@@ -16,7 +16,7 @@ namespace TestLogWebapi.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger,ILoggerManager loggerManager)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ILoggerManager loggerManager)
         {
             _logger = logger;
             _logger2 = loggerManager;
