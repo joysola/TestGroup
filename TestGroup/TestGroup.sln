@@ -15,9 +15,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoggerService", "Asp.Net Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts", "Asp.Net Core\Chapter2\Contracts\Contracts.csproj", "{B30D4DA5-65FE-47D4-81B4-7E5ABB3298C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLogWebapi", "Asp.Net Core\Chapter2\TestLogWebapi\TestLogWebapi.csproj", "{D16DDC14-1DDF-459D-AD0A-05D415DB9FEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestLogWebapi", "Asp.Net Core\Chapter2\TestLogWebapi\TestLogWebapi.csproj", "{D16DDC14-1DDF-459D-AD0A-05D415DB9FEE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompanyEmployees", "Asp.Net Core\Chapter1\CompanyEmployees\CompanyEmployees.csproj", "{2AC90CF2-7D56-4554-9174-924A2340B042}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chapter3 Onion Architecture", "Chapter3 Onion Architecture", "{75D1565C-DA9A-4273-93C8-2690E9D77C9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Asp.Net Core\Chapter3\Entities\Entities.csproj", "{F6D3F7D3-149E-4D0E-A41D-F23320820D9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,10 @@ Global
 		{2AC90CF2-7D56-4554-9174-924A2340B042}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AC90CF2-7D56-4554-9174-924A2340B042}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AC90CF2-7D56-4554-9174-924A2340B042}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6D3F7D3-149E-4D0E-A41D-F23320820D9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6D3F7D3-149E-4D0E-A41D-F23320820D9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6D3F7D3-149E-4D0E-A41D-F23320820D9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6D3F7D3-149E-4D0E-A41D-F23320820D9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,6 +65,8 @@ Global
 		{B30D4DA5-65FE-47D4-81B4-7E5ABB3298C4} = {9AB475A7-185D-473E-8E74-9C129E82D697}
 		{D16DDC14-1DDF-459D-AD0A-05D415DB9FEE} = {9AB475A7-185D-473E-8E74-9C129E82D697}
 		{2AC90CF2-7D56-4554-9174-924A2340B042} = {0767E854-B560-44F1-BD01-BDFB1E319881}
+		{75D1565C-DA9A-4273-93C8-2690E9D77C9E} = {E0C7DFDD-BEB6-4480-90D6-867E722BD2B6}
+		{F6D3F7D3-149E-4D0E-A41D-F23320820D9A} = {75D1565C-DA9A-4273-93C8-2690E9D77C9E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5F15127E-7428-4DC2-8B59-98F422C0234E}
