@@ -18,6 +18,8 @@
     <ProjectReference Include="..\..\Chapter2\Contracts\Contracts.csproj" />
     <ProjectReference Include="..\..\Chapter2\LoggerService\LoggerService.csproj" />
     <ProjectReference Include="..\Chapter3.Contracts\Chapter3.Contracts.csproj" />
+    <ProjectReference Include="..\Chapter3.Service.Contracts\Chapter3.Service.Contracts.csproj" />
+    <ProjectReference Include="..\Chapter3.Service\Chapter3.Service.csproj" />
     <ProjectReference Include="..\Repository\Repository.csproj" />
   </ItemGroup>
 
