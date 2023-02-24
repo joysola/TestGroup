@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using MySql.EntityFrameworkCore.Extensions;
 using Repository;
 
-namespace Chapter3WebApi.ContextFactory
+namespace Chapter4.WebApi
 {
     public static class ServiceExtensions
     {

@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Chapter2\LoggerService\LoggerService.csproj" />
-  </ItemGroup>
-
 </Project>

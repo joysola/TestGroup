@@ -1,6 +1,5 @@
 ﻿using Chapter3.Contracts;
 using Chapter3.Service.Contracts;
-using Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;

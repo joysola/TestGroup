@@ -1,4 +1,4 @@
-﻿using Contracts;
+﻿using Chapter3.Contracts;
 using LoggerService;
 
 namespace TestLogWebapi.Extensions
