@@ -1,4 +1,5 @@
 using Chapter4.WebApi;
+using Google.Protobuf.WellKnownTypes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +9,7 @@ builder.Services.ConfigureServiceManager(); //
 //builder.Services.ConfigureSqlContext(builder.Configuration); //
 builder.Services.ConfigureSqlContext2(builder.Configuration); //
 builder.Services.ConfigureLoggerService();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
 
 var app = builder.Build();
 

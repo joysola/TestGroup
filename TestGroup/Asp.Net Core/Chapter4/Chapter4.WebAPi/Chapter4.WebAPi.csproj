@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\**" />
+    <Content Remove="Controllers\**" />
+    <EmbeddedResource Remove="Controllers\**" />
+    <None Remove="Controllers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="WeatherForecast.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.3">
       <PrivateAssets>all</PrivateAssets>
@@ -21,6 +32,7 @@
     <ProjectReference Include="..\..\Chapter3\Chapter3.Service.Contracts\Chapter3.Service.Contracts.csproj" />
     <ProjectReference Include="..\..\Chapter3\Chapter3.Service\Chapter3.Service.csproj" />
     <ProjectReference Include="..\..\Chapter3\Repository\Repository.csproj" />
+    <ProjectReference Include="..\CompanyEmployees.Presentation\CompanyEmployees.Presentation.csproj" />
   </ItemGroup>
 
 </Project>
