@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chapter4.WebAPi", "Asp.Net 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompanyEmployees.Presentation", "Asp.Net Core\Chapter4\CompanyEmployees.Presentation\CompanyEmployees.Presentation.csproj", "{099338F4-C965-4D8C-ACD8-4166A725CBDB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Asp.Net Core\Chapter4\Shared\Shared.csproj", "{9DA9B89D-B303-4767-BAA7-77755FAF34DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{099338F4-C965-4D8C-ACD8-4166A725CBDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{099338F4-C965-4D8C-ACD8-4166A725CBDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{099338F4-C965-4D8C-ACD8-4166A725CBDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DA9B89D-B303-4767-BAA7-77755FAF34DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DA9B89D-B303-4767-BAA7-77755FAF34DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DA9B89D-B303-4767-BAA7-77755FAF34DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DA9B89D-B303-4767-BAA7-77755FAF34DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -112,6 +118,7 @@ Global
 		{D7A9B61D-6C85-4214-9D16-3EAEE9882FA7} = {E0C7DFDD-BEB6-4480-90D6-867E722BD2B6}
 		{0AE92684-4E8B-4965-9038-6B809DA42A18} = {D7A9B61D-6C85-4214-9D16-3EAEE9882FA7}
 		{099338F4-C965-4D8C-ACD8-4166A725CBDB} = {D7A9B61D-6C85-4214-9D16-3EAEE9882FA7}
+		{9DA9B89D-B303-4767-BAA7-77755FAF34DB} = {D7A9B61D-6C85-4214-9D16-3EAEE9882FA7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5F15127E-7428-4DC2-8B59-98F422C0234E}
