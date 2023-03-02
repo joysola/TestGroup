@@ -348,3 +348,4 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/TestGroup/Asp.Net Core/Chapter4/Chapter4.WebAPi/internal_logs
