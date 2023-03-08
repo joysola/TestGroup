@@ -1,4 +1,7 @@
 using Chaper5.WebApi;
+using Chaper5.WebApi.Extensions;
+using Chapter3.Contracts;
+using Microsoft.AspNetCore.HttpOverrides;
 using NLog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,8 +21,17 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
+var logger = app.Services.GetRequiredService<ILoggerManager>();
+app.ConfigureExceptionHandler(logger);
+if (app.Environment.IsProduction())
+    app.UseHsts();
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.All
+});
+app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 
