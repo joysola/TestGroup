@@ -2,6 +2,7 @@
 using Chapter3.Contracts;
 using Chapter3.Service.Contracts;
 using Entities;
+using Entities.Exceptions;
 using Shared.DataTransferObjects;
 using System;
 using System.Collections.Generic;
@@ -41,6 +42,8 @@ namespace Chapter3.Service
         {
             var company = _repository.Company.GetCompany(id, trackChanges);
             //Check if the company is null
+            if (company is null)
+                throw new CompanyNotFoundException(id);
             var companyDto = _mapper.Map<CompanyDto>(company);
             return companyDto;
 
