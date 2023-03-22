@@ -13,7 +13,16 @@ builder.Services.ConfigureServiceManager(); //
 builder.Services.ConfigureSqlContext2(builder.Configuration); //
 builder.Services.ConfigureLoggerService();
 LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
-builder.Services.AddControllers().AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
+
+
+
+builder.Services.AddControllers(config =>
+{
+    config.RespectBrowserAcceptHeader = true; // Accept text/xml¡¢text/json
+    config.ReturnHttpNotAcceptable = true;
+}).AddXmlDataContractSerializerFormatters()
+.AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
+
 builder.Services.AddAutoMapper(typeof(Program)); //
 
 builder.Services.AddControllers();
