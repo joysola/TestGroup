@@ -19,7 +19,7 @@ LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nl
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true; // Accept text/xml¡¢text/json
-    config.ReturnHttpNotAcceptable = true;
+    config.ReturnHttpNotAcceptable = true; // 406
 }).AddXmlDataContractSerializerFormatters()
 .AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
 
