@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
-using Chapter3.Contracts;
-using Chapter3.Service.Contracts;
+using Contracts;
+using Service.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Chapter3.Service
+namespace Service
 {
     public sealed class ServiceManager : IServiceManager
     {

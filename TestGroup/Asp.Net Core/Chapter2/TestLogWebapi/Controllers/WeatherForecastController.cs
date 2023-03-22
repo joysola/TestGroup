@@ -1,4 +1,4 @@
-using Chapter3.Contracts;
+using Contracts;
 using LoggerService;
 using Microsoft.AspNetCore.Mvc;
 

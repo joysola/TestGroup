@@ -1,8 +1,8 @@
 ﻿
 
-using Chapter3.Contracts;
-using Chapter3.Service;
-using Chapter3.Service.Contracts;
+using Contracts;
+using Service;
+using Service.Contracts;
 using LoggerService;
 using Microsoft.EntityFrameworkCore;
 using MySql.EntityFrameworkCore.Extensions;

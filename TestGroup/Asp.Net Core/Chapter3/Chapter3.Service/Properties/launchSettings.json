@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Chapter3.Service": {
+    "Service": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Chapter3.Contracts;
-using Chapter3.Service.Contracts;
+using Contracts;
+using Service.Contracts;
 using Entities;
 using Entities.Exceptions;
 using Shared.DataTransferObjects;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Chapter3.Service
+namespace Service
 {
     internal sealed class CompanyService : ICompanyService
     {

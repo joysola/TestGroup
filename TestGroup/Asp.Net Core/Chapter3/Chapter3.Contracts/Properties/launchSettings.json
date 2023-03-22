@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Chapter3.Contracts": {
+    "Contracts": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

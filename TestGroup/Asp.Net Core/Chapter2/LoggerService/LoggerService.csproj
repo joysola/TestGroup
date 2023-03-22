@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Chapter3\Chapter3.Contracts\Chapter3.Contracts.csproj" />
+    <ProjectReference Include="..\..\Chapter3\Chapter3.Contracts\Contracts.csproj" />
   </ItemGroup>
 
 </Project>

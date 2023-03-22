@@ -25,11 +25,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repository", "Asp.Net Core\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chapter3WebApi", "Asp.Net Core\Chapter3\Chapter3WebApi\Chapter3WebApi.csproj", "{C07DAD42-6402-4281-B7F7-37F9E5276630}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chapter3.Contracts", "Asp.Net Core\Chapter3\Chapter3.Contracts\Chapter3.Contracts.csproj", "{0C6AE92D-75BD-4C04-AEB4-4E86D836A69B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts", "Asp.Net Core\Chapter3\Chapter3.Contracts\Contracts.csproj", "{0C6AE92D-75BD-4C04-AEB4-4E86D836A69B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chapter3.Service.Contracts", "Asp.Net Core\Chapter3\Chapter3.Service.Contracts\Chapter3.Service.Contracts.csproj", "{82EC5609-A0E3-4F13-9143-E766FB26C213}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service.Contracts", "Asp.Net Core\Chapter3\Chapter3.Service.Contracts\Service.Contracts.csproj", "{82EC5609-A0E3-4F13-9143-E766FB26C213}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chapter3.Service", "Asp.Net Core\Chapter3\Chapter3.Service\Chapter3.Service.csproj", "{C3F512BF-A6E7-4080-BB24-C65E8A6FD366}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service", "Asp.Net Core\Chapter3\Chapter3.Service\Service.csproj", "{C3F512BF-A6E7-4080-BB24-C65E8A6FD366}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chapter4 Handling Get Request", "Chapter4 Handling Get Request", "{D7A9B61D-6C85-4214-9D16-3EAEE9882FA7}"
 EndProject

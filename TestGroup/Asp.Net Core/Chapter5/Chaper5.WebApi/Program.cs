@@ -1,6 +1,6 @@
 using Chaper5.WebApi;
 using Chaper5.WebApi.Extensions;
-using Chapter3.Contracts;
+using Contracts;
 using Microsoft.AspNetCore.HttpOverrides;
 using NLog;
 
