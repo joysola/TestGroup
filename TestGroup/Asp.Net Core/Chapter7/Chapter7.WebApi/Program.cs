@@ -20,7 +20,9 @@ builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true; // Accept text/xml¡¢text/json
     config.ReturnHttpNotAcceptable = true; // 406
-}).AddXmlDataContractSerializerFormatters()
+})
+    .AddXmlDataContractSerializerFormatters()
+    .AddCustomCSVFormatter()
 .AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
 
 builder.Services.AddAutoMapper(typeof(Program)); //

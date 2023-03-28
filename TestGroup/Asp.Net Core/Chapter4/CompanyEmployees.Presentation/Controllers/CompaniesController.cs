@@ -14,7 +14,7 @@ namespace CompanyEmployees.Presentation.Controllers
     {
         private readonly IServiceManager _service;
         public CompaniesController(IServiceManager service) => _service = service;
-        [HttpGet]
+        [HttpGet("{id:guid}", Name = "CompanyById")]
         public IActionResult GetCompanies()
         {
             //throw new Exception("Exception");

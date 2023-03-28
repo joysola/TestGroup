@@ -35,10 +35,14 @@ namespace Chapter7.WebApi
             services.AddScoped<IServiceManager, ServiceManager>();
 
         public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration) =>
-            services.AddDbContext<RepositoryContext>(opts => 
+            services.AddDbContext<RepositoryContext>(opts =>
             opts.UseMySQL(configuration.GetConnectionString("sqlConnection")));
 
         public static void ConfigureSqlContext2(this IServiceCollection services, IConfiguration configuration) =>
             services.AddMySQLServer<RepositoryContext>((configuration.GetConnectionString("sqlConnection")));
+
+
+        public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder) =>
+            builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormatter()));
     }
 }
