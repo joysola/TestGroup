@@ -47,7 +47,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shares", "Shares", "{9A2BAC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chapter7 Content Negotiation", "Chapter7 Content Negotiation", "{1944F02B-909B-41CA-9BD8-9F5657512B83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chapter7.WebApi", "Asp.Net Core\Chapter7\Chapter7.WebApi\Chapter7.WebApi.csproj", "{236F3A16-9FB5-4624-A006-898CD36FB75E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chapter7.WebApi", "Asp.Net Core\Chapter7\Chapter7.WebApi\Chapter7.WebApi.csproj", "{236F3A16-9FB5-4624-A006-898CD36FB75E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chapter9 Creating Resources", "Chapter9 Creating Resources", "{279B75A1-1285-4E13-A4E1-60CC1446E37C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chapter9.WebApi", "Asp.Net Core\Chapter9\Chapter9.WebApi\Chapter9.WebApi.csproj", "{1928F74F-95FB-4EE8-A551-02625EE0BD03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -115,6 +119,10 @@ Global
 		{236F3A16-9FB5-4624-A006-898CD36FB75E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{236F3A16-9FB5-4624-A006-898CD36FB75E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{236F3A16-9FB5-4624-A006-898CD36FB75E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1928F74F-95FB-4EE8-A551-02625EE0BD03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1928F74F-95FB-4EE8-A551-02625EE0BD03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1928F74F-95FB-4EE8-A551-02625EE0BD03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1928F74F-95FB-4EE8-A551-02625EE0BD03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,6 +150,8 @@ Global
 		{9A2BACAF-5164-4D0F-B405-0ED003EAE011} = {E0C7DFDD-BEB6-4480-90D6-867E722BD2B6}
 		{1944F02B-909B-41CA-9BD8-9F5657512B83} = {E0C7DFDD-BEB6-4480-90D6-867E722BD2B6}
 		{236F3A16-9FB5-4624-A006-898CD36FB75E} = {1944F02B-909B-41CA-9BD8-9F5657512B83}
+		{279B75A1-1285-4E13-A4E1-60CC1446E37C} = {E0C7DFDD-BEB6-4480-90D6-867E722BD2B6}
+		{1928F74F-95FB-4EE8-A551-02625EE0BD03} = {279B75A1-1285-4E13-A4E1-60CC1446E37C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5F15127E-7428-4DC2-8B59-98F422C0234E}
