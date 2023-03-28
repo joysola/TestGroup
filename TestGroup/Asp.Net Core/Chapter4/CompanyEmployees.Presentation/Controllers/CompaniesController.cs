@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Shared.DataTransferObjects;
 
 namespace CompanyEmployees.Presentation.Controllers
 {
@@ -14,7 +15,7 @@ namespace CompanyEmployees.Presentation.Controllers
     {
         private readonly IServiceManager _service;
         public CompaniesController(IServiceManager service) => _service = service;
-        [HttpGet("{id:guid}", Name = "CompanyById")]
+      
         public IActionResult GetCompanies()
         {
             //throw new Exception("Exception");
@@ -28,11 +29,21 @@ namespace CompanyEmployees.Presentation.Controllers
             //    return StatusCode(500, "Internal server error");
             //}
         }
-        [HttpGet("{id:guid}")]
+        [HttpGet("{id:guid}", Name = "CompanyById")]
         public IActionResult GetCompany(Guid id)
         {
             var company = _service.CompanyService.GetCompany(id, trackChanges: false);
             return Ok(company);
+        }
+
+        [HttpPost]
+        public IActionResult CreateCompany([FromBody] CompanyForCreationDto company)
+        {
+            if (company is null)
+                return BadRequest("CompanyForCreationDto object is null");
+            var xx = System.Text.Json.JsonSerializer.Serialize(company);
+            var createdCompany = _service.CompanyService.CreateCompany(company);
+            return CreatedAtRoute("CompanyById", new { id = createdCompany.Id }, createdCompany);
         }
     }
 
