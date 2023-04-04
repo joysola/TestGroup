@@ -3,6 +3,7 @@ using Chapter9.WebApi;
 using Contracts;
 using Microsoft.AspNetCore.HttpOverrides;
 using NLog;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,10 @@ builder.Services.ConfigureSqlContext2(builder.Configuration); //
 builder.Services.ConfigureLoggerService();
 LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
 
-
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    //options.SuppressModelStateInvalidFilter = true;
+});
 
 builder.Services.AddControllers(config =>
 {
@@ -27,7 +31,7 @@ builder.Services.AddControllers(config =>
 
 builder.Services.AddAutoMapper(typeof(Program)); //
 
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
 
 var app = builder.Build();
 
