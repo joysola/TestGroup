@@ -15,6 +15,7 @@ builder.Services.ConfigureSqlContext2(builder.Configuration); //
 builder.Services.ConfigureLoggerService();
 LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
 
+// 去除apicontrollr的自动验证参数（参数）
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     //options.SuppressModelStateInvalidFilter = true;
