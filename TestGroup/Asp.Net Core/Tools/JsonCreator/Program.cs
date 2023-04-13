@@ -11,7 +11,11 @@ namespace JsonCreator
             var cfc2 = new CompanyForCreationDto("Fox", "Street ABC", "US");
             var cfc3 = new CompanyForCreationDto("Fox", "Street ABC", "US");
             var list = new List<CompanyForCreationDto> { cfc1, cfc2, cfc3 };
-            var json = JsonConvert.SerializeObject(list);
+
+
+            var efc1 = new EmployeeForCreationDto("Jack", 33, "ABVsdhja");
+
+            var json = JsonConvert.SerializeObject(efc1);
             Console.WriteLine("Hello, World!");
         }
     }
