@@ -16,7 +16,9 @@ namespace JsonCreator
             var efc1 = new EmployeeForCreationDto("Jack", 33, "ABVsdhja");
 
             var efu1 = new EmployeeForUpdateDto("joysola", 25, "Software Engineer");
-            var json = JsonConvert.SerializeObject(efu1);
+            var cfu1 = new CompanyForUpdateDto("Santiago Anymore", "Lasagna Bluetooth", "Italy",
+                new[] { new EmployeeForCreationDto("Jackson", 99, "Marketing Design") });
+            var json = JsonConvert.SerializeObject(cfu1);
             Console.WriteLine("Hello, World!");
         }
     }
