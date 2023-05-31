@@ -20,7 +20,7 @@ LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nl
 // 去除apicontrollr的自动验证参数（参数）
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-    //options.SuppressModelStateInvalidFilter = true;
+    options.SuppressModelStateInvalidFilter = true;
 });
 
 builder.Services.AddControllers(config =>
