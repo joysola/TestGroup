@@ -45,15 +45,25 @@ namespace CompanyEmployees.Presentation.Controllers
             return Ok(company);
         }
 
+
         [HttpPost]
-        public IActionResult CreateCompany([FromBody] CompanyForCreationDto company)
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto company)
         {
-            if (company is null)
-                return BadRequest("CompanyForCreationDto object is null");
-            var xx = System.Text.Json.JsonSerializer.Serialize(company);
-            var createdCompany = _service.CompanyService.CreateCompany(company);
-            return CreatedAtRoute("CompanyById", new { id = createdCompany.Id }, createdCompany);
+            var createdCompany = await _service.CompanyService.CreateCompanyAsync(company);
+            return CreatedAtRoute("CompanyById", new { id = createdCompany.Id },
+            createdCompany);
         }
+
+        //[HttpPost]
+        //public IActionResult CreateCompany([FromBody] CompanyForCreationDto company)
+        //{
+        //    if (company is null)
+        //        return BadRequest("CompanyForCreationDto object is null");
+        //    //var xx = System.Text.Json.JsonSerializer.Serialize(company);
+        //    var createdCompany = _service.CompanyService.CreateCompany(company);
+        //    return CreatedAtRoute("CompanyById", new { id = createdCompany.Id }, createdCompany);
+        //}
 
         //[HttpGet("collection/({ids})", Name = "CompanyCollection")]
         //public IActionResult GetCompanyCollection([ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
@@ -109,12 +119,12 @@ namespace CompanyEmployees.Presentation.Controllers
         //    _service.CompanyService.UpdateCompany(id, company, trackChanges: true);
         //    return NoContent();
         //}
-
         [HttpPut("{id:guid}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> UpdateCompany(Guid id, [FromBody] CompanyForUpdateDto company)
         {
-            if (company is null)
-                return BadRequest("CompanyForUpdateDto object is null");
+            //if (company is null)
+            //    return BadRequest("CompanyForUpdateDto object is null");
             await _service.CompanyService.UpdateCompanyAsync(id, company, trackChanges: true);
             return NoContent();
         }

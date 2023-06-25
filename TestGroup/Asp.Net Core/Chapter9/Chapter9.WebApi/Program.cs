@@ -6,6 +6,7 @@ using NLog;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using CompanyEmployees.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,15 +24,17 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true;
 });
 
+builder.Services.AddScoped<ValidationFilterAttribute>();
+
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true; // Accept text/xml¡¢text/json
     config.ReturnHttpNotAcceptable = true; // 406
     config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
 })
-    .AddXmlDataContractSerializerFormatters()
-    .AddCustomCSVFormatter()
-.AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
+ .AddXmlDataContractSerializerFormatters()
+ .AddCustomCSVFormatter()
+ .AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
 
 builder.Services.AddAutoMapper(typeof(Program)); //
 
