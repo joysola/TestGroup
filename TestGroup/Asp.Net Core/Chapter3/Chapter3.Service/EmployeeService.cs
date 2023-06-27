@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Entities;
+using Shared.RequestFeatures;
 
 namespace Service
 {
@@ -31,7 +32,13 @@ namespace Service
             var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
             return employeesDto;
         }
-
+        public async Task<IEnumerable<EmployeeDto>> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
+        {
+            await CheckIfCompanyExists(companyId, trackChanges);
+            var employeesFromDb = await _repository.Employee.GetEmployeesAsync(companyId, employeeParameters, trackChanges);
+            var employeesDto = _mapper.Map<IEnumerable<EmployeeDto>>(employeesFromDb);
+            return employeesDto;
+        }
         public EmployeeDto GetEmployee(Guid companyId, Guid id, bool trackChanges)
         {
             var company = _repository.Company.GetCompany(companyId, trackChanges);

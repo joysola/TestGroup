@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Shared.DataTransferObjects;
 using Microsoft.AspNetCore.JsonPatch;
+using Shared.RequestFeatures;
 
 namespace CompanyEmployees.Presentation.Controllers
 {
@@ -16,12 +17,12 @@ namespace CompanyEmployees.Presentation.Controllers
     {
         private readonly IServiceManager _service;
         public EmployeesController(IServiceManager service) => _service = service;
-        [HttpGet]
-        public IActionResult GetEmployeesForCompany(Guid companyId)
-        {
-            var employees = _service.EmployeeService.GetEmployees(companyId, trackChanges: false);
-            return Ok(employees);
-        }
+        //[HttpGet]
+        //public IActionResult GetEmployeesForCompany(Guid companyId)
+        //{
+        //    var employees = _service.EmployeeService.GetEmployees(companyId, trackChanges: false);
+        //    return Ok(employees);
+        //}
 
         //[HttpGet("{id:guid}")]
         [HttpGet("{id:guid}", Name = "GetEmployeeForCompany")]
@@ -33,13 +34,13 @@ namespace CompanyEmployees.Presentation.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateEmployeeForCompany(Guid companyId, [FromBody] EmployeeForCreationDto employee)
+        public async Task<IActionResult> CreateEmployeeForCompany(Guid companyId, [FromBody] EmployeeForCreationDto employee)
         {
             if (employee is null)
                 return BadRequest("EmployeeForCreationDto object is null");
             if (!ModelState.IsValid)
                 return UnprocessableEntity(ModelState);
-            var employeeToReturn = _service.EmployeeService.CreateEmployeeForCompany(companyId, employee, trackChanges: false);
+            var employeeToReturn =await _service.EmployeeService.CreateEmployeeForCompanyAsync(companyId, employee, trackChanges: false);
             return CreatedAtRoute("GetEmployeeForCompany", new
             {
                 companyId,
@@ -81,6 +82,13 @@ namespace CompanyEmployees.Presentation.Controllers
                 return UnprocessableEntity(ModelState);
             _service.EmployeeService.SaveChangesForPatch(result.employeeToPatch, result.employeeEntity);
             return NoContent();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetEmployeesForCompany(Guid companyId, [FromQuery] EmployeeParameters employeeParameters)
+        {
+            var employees = await _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+            return Ok(employees);
         }
     }
 }
