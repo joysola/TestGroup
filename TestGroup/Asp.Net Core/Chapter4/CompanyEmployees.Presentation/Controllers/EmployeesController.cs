@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Shared.DataTransferObjects;
 using Microsoft.AspNetCore.JsonPatch;
 using Shared.RequestFeatures;
+using System.Text.Json;
 
 namespace CompanyEmployees.Presentation.Controllers
 {
@@ -40,7 +41,7 @@ namespace CompanyEmployees.Presentation.Controllers
                 return BadRequest("EmployeeForCreationDto object is null");
             if (!ModelState.IsValid)
                 return UnprocessableEntity(ModelState);
-            var employeeToReturn =await _service.EmployeeService.CreateEmployeeForCompanyAsync(companyId, employee, trackChanges: false);
+            var employeeToReturn = await _service.EmployeeService.CreateEmployeeForCompanyAsync(companyId, employee, trackChanges: false);
             return CreatedAtRoute("GetEmployeeForCompany", new
             {
                 companyId,
@@ -84,11 +85,27 @@ namespace CompanyEmployees.Presentation.Controllers
             return NoContent();
         }
 
+        //[HttpGet]
+        //public async Task<IActionResult> GetEmployeesForCompany(Guid companyId, [FromQuery] EmployeeParameters employeeParameters)
+        //{
+        //    var employees = await _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+        //    return Ok(employees);
+        //}
+
         [HttpGet]
         public async Task<IActionResult> GetEmployeesForCompany(Guid companyId, [FromQuery] EmployeeParameters employeeParameters)
         {
-            var employees = await _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
-            return Ok(employees);
+            //var t1 = _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+            //var t2 = _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+            //var t3 = _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+            //var t4 = _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+            //var t5 = _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+            //var t6 = _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+            //var t7 = _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+            //await Task.WhenAll(t1, t2, t3, t4,t5,t6,t7);
+            var pagedResult = await _service.EmployeeService.GetEmployeesAsync(companyId, employeeParameters, trackChanges: false);
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagedResult.metaData));
+            return Ok(pagedResult.employees);
         }
     }
 }
