@@ -29,17 +29,29 @@ namespace Repository
         //    .Take(employeeParameters.PageSize)
         //    .ToListAsync();
 
-        public async Task<PagedList<Employee>> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
+        public async Task<PagedList<Employee>> GetEmployeesAsyncOld(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
         {
             var employees = await FindByCondition(e => e.CompanyId.Equals(companyId), trackChanges)
                 .Skip((employeeParameters.PageNumber - 1) * employeeParameters.PageSize).Take(employeeParameters.PageSize)
                 .OrderBy(e => e.Name)
                 .ToListAsync();
-            var count = await FindByCondition(e => e.CompanyId.Equals(companyId), trackChanges).CountAsync()
+            var count = await FindByCondition(e => e.CompanyId.Equals(companyId), trackChanges).CountAsync();
             //return PagedList<Employee>.ToPagedList(employees, employeeParameters.PageNumber, employeeParameters.PageSize);
             return new PagedList<Employee>(employees, count, employeeParameters.PageNumber, employeeParameters.PageSize);
 
         }
+
+        public async Task<PagedList<Employee>> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
+        {
+            var employees = await FindByCondition(e => e.CompanyId.Equals(companyId) && 
+            (e.Age >= employeeParameters.MinAge && e.Age <= employeeParameters.MaxAge), trackChanges)
+            .OrderBy(e => e.Name)
+            .ToListAsync();
+            return PagedList<Employee>
+            .ToPagedList(employees, employeeParameters.PageNumber,
+            employeeParameters.PageSize);
+        }
+
 
         public Employee GetEmployee(Guid companyId, Guid id, bool trackChanges) =>
             FindByCondition(e => e.CompanyId.Equals(companyId) && e.Id.Equals(id), trackChanges)
