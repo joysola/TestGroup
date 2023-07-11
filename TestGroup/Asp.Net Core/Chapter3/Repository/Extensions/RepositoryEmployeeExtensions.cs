@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq.Dynamic.Core;
 
 namespace Repository.Extensions
 {
@@ -17,6 +19,17 @@ namespace Repository.Extensions
                 return employees;
             var lowerCaseTerm = searchTerm.Trim().ToLower();
             return employees.Where(e => e.Name.ToLower().Contains(lowerCaseTerm));
+        }
+
+        public static IQueryable<Employee> Sort(this IQueryable<Employee> employees, string orderByQueryString)
+        {
+            if (string.IsNullOrWhiteSpace(orderByQueryString))
+                return employees.OrderBy(e => e.Name);
+
+            var orderQuery = OrderQueryBuilder.CreateOrderQuery<Employee>(orderByQueryString);
+            if (string.IsNullOrWhiteSpace(orderQuery))
+                return employees.OrderBy(e => e.Name);
+            return employees.OrderBy(orderQuery); // 核心
         }
     }
 }
