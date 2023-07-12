@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using CompanyEmployees.Presentation;
+using Service.DataShaping;
+using Shared.DataTransferObjects;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,8 @@ builder.Services.ConfigureServiceManager(); //
 builder.Services.ConfigureSqlContext2(builder.Configuration); //
 builder.Services.ConfigureLoggerService();
 LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
+
+builder.Services.AddScoped<IDataShaper<EmployeeDto>, DataShaper<EmployeeDto>>();
 
 // 去除apicontrollr的自动验证参数（参数）
 builder.Services.Configure<ApiBehaviorOptions>(options =>
