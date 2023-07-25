@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using CompanyEmployees.Presentation;
 using Service.DataShaping;
 using Shared.DataTransferObjects;
+using CompanyEmployees.Presentation.ActionFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddScoped<ValidateMediaTypeAttribute>();
+
 
 builder.Services.AddControllers(config =>
 {
@@ -39,6 +42,8 @@ builder.Services.AddControllers(config =>
  .AddXmlDataContractSerializerFormatters()
  .AddCustomCSVFormatter()
  .AddApplicationPart(typeof(CompanyEmployees.Presentation.AssemblyReference).Assembly);
+
+builder.Services.AddCustomMediaTypes();
 
 builder.Services.AddAutoMapper(typeof(Program)); //
 

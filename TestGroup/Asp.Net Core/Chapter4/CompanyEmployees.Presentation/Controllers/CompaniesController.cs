@@ -25,6 +25,7 @@ namespace CompanyEmployees.Presentation.Controllers
             return Ok();
         }
 
+        [HttpGet(Name = "GetCompanies")]
         public IActionResult GetCompanies()
         {
             //throw new Exception("Exception");
@@ -54,7 +55,7 @@ namespace CompanyEmployees.Presentation.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost(Name = "CreateCompany")]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateCompany([FromBody] CompanyForCreationDto company)
         {
