@@ -47,6 +47,7 @@ builder.Services.AddCustomMediaTypes();
 
 builder.Services.AddAutoMapper(typeof(Program)); //
 
+builder.Services.ConfigureVersioning();
 //builder.Services.AddControllers();
 
 var app = builder.Build();

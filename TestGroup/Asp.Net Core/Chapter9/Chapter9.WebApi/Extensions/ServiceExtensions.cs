@@ -9,6 +9,8 @@ using MySql.EntityFrameworkCore.Extensions;
 using Repository;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using CompanyEmployees.Presentation.Controllers;
 
 namespace Chapter9.WebApi
 {
@@ -64,6 +66,20 @@ namespace Chapter9.WebApi
                     xmlOutputFormatter.SupportedMediaTypes.Add("application/vnd.codemaze.hateoas+xml");
                     xmlOutputFormatter.SupportedMediaTypes.Add("application/vnd.codemaze.apiroot+xml");
                 }
+            });
+        }
+
+        public static void ConfigureVersioning(this IServiceCollection services)
+        {
+            services.AddApiVersioning(opt =>
+            {
+                opt.ReportApiVersions = true;
+                opt.AssumeDefaultVersionWhenUnspecified = true;
+                opt.DefaultApiVersion = new ApiVersion(1, 0);
+                opt.ApiVersionReader = new HeaderApiVersionReader("api-version"); // header 请求头里
+                //opt.ApiVersionReader = new QueryStringApiVersionReader("api-version"); // url的请求参数里
+                opt.Conventions.Controller<CompaniesController>().HasApiVersion(new ApiVersion(1, 0));
+                opt.Conventions.Controller<CompaniesV2Controller>().HasDeprecatedApiVersion(new ApiVersion(2, 0));
             });
         }
     }
