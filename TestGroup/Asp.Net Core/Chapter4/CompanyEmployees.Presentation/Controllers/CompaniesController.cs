@@ -13,6 +13,7 @@ namespace CompanyEmployees.Presentation.Controllers
     //[ApiVersion("1.0")]
     [Route("api/companies")]
     [ApiController]
+    [ResponseCache(CacheProfileName = "120SecondsDuration")]
     public class CompaniesController : ControllerBase
     {
         private readonly IServiceManager _service;
@@ -47,7 +48,7 @@ namespace CompanyEmployees.Presentation.Controllers
         //    var company = _service.CompanyService.GetCompany(id, trackChanges: false);
         //    return Ok(company);
         //}
-
+        [ResponseCache(Duration = 60)]
         [HttpGet("{id:guid}", Name = "CompanyById")]
         public async Task<IActionResult> GetCompany(Guid id)
         {

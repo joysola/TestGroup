@@ -38,6 +38,10 @@ builder.Services.AddControllers(config =>
     config.RespectBrowserAcceptHeader = true; // Accept text/xml¡¢text/json
     config.ReturnHttpNotAcceptable = true; // 406
     config.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+    config.CacheProfiles.Add("120SecondsDuration", new CacheProfile
+    {
+        Duration = 120
+    });
 })
  .AddXmlDataContractSerializerFormatters()
  .AddCustomCSVFormatter()
@@ -48,6 +52,9 @@ builder.Services.AddCustomMediaTypes();
 builder.Services.AddAutoMapper(typeof(Program)); //
 
 builder.Services.ConfigureVersioning();
+
+builder.Services.ConfigureResponseCaching();
+
 //builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -65,7 +72,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 });
 app.UseCors("CorsPolicy");
 
-
+app.UseResponseCaching();
 
 app.UseAuthorization();
 
