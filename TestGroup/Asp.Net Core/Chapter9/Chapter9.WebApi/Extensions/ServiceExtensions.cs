@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using CompanyEmployees.Presentation.Controllers;
+using Marvin.Cache.Headers;
 
 namespace Chapter9.WebApi
 {
@@ -83,7 +84,17 @@ namespace Chapter9.WebApi
             });
         }
 
-        public static void ConfigureResponseCaching(this IServiceCollection services) => 
+        public static void ConfigureResponseCaching(this IServiceCollection services) =>
             services.AddResponseCaching();
+
+        public static void ConfigureHttpCacheHeaders(this IServiceCollection services) =>
+            services.AddHttpCacheHeaders((expirationOpt) =>
+            {
+                expirationOpt.MaxAge = 65;
+                expirationOpt.CacheLocation = CacheLocation.Private;
+            }, (validationOpt) =>
+            {
+                validationOpt.MustRevalidate = true;
+            });
     }
 }

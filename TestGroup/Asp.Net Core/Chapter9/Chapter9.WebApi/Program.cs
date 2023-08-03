@@ -54,7 +54,7 @@ builder.Services.AddAutoMapper(typeof(Program)); //
 builder.Services.ConfigureVersioning();
 
 builder.Services.ConfigureResponseCaching();
-
+builder.Services.ConfigureHttpCacheHeaders();
 //builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -73,6 +73,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 app.UseCors("CorsPolicy");
 
 app.UseResponseCaching();
+app.UseHttpCacheHeaders();
 
 app.UseAuthorization();
 

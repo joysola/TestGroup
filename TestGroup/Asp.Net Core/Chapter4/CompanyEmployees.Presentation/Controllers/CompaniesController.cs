@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Shared.DataTransferObjects;
 using CompanyEmployees.Presentation.ModelBinders;
+using Marvin.Cache.Headers;
 
 namespace CompanyEmployees.Presentation.Controllers
 {
@@ -48,7 +49,12 @@ namespace CompanyEmployees.Presentation.Controllers
         //    var company = _service.CompanyService.GetCompany(id, trackChanges: false);
         //    return Ok(company);
         //}
-        [ResponseCache(Duration = 60)]
+
+
+
+        //[ResponseCache(Duration = 60)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]
+        [HttpCacheValidation(MustRevalidate = false)]
         [HttpGet("{id:guid}", Name = "CompanyById")]
         public async Task<IActionResult> GetCompany(Guid id)
         {
