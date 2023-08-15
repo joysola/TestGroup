@@ -10,6 +10,7 @@ using CompanyEmployees.Presentation;
 using Service.DataShaping;
 using Shared.DataTransferObjects;
 using CompanyEmployees.Presentation.ActionFilters;
+using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,10 @@ builder.Services.AddCustomMediaTypes();
 
 builder.Services.AddAutoMapper(typeof(Program)); //
 
+builder.Services.AddMemoryCache();
+builder.Services.ConfigureRateLimitingOptions();
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.ConfigureVersioning();
 
 builder.Services.ConfigureResponseCaching();
@@ -70,6 +75,10 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.All
 });
+
+
+app.UseIpRateLimiting();
+
 app.UseCors("CorsPolicy");
 
 app.UseResponseCaching();
