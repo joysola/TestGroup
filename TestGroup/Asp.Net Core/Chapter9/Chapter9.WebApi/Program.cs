@@ -60,6 +60,10 @@ builder.Services.ConfigureVersioning();
 
 builder.Services.ConfigureResponseCaching();
 builder.Services.ConfigureHttpCacheHeaders();
+
+
+builder.Services.AddAuthentication();
+builder.Services.ConfigureIdentity();
 //builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -84,6 +88,7 @@ app.UseCors("CorsPolicy");
 app.UseResponseCaching();
 app.UseHttpCacheHeaders();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
