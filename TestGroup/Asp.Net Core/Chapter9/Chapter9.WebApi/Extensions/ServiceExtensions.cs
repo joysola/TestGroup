@@ -108,7 +108,7 @@ namespace Chapter9.WebApi
                 new RateLimitRule
                 {
                     Endpoint = "*",
-                    Limit = 3,
+                    Limit = 30,//3,
                     Period = "5m"
                 }
             };

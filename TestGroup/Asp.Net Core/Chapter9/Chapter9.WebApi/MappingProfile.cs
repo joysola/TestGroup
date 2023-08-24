@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Entities;
+using Entities.Models;
 using Shared.DataTransferObjects;
 
 namespace Chapter9.WebApi
@@ -18,6 +19,7 @@ namespace Chapter9.WebApi
             CreateMap<EmployeeForUpdateDto, Employee>();
             CreateMap<CompanyForUpdateDto, Company>();
             CreateMap<EmployeeForUpdateDto, Employee>().ReverseMap();
+            CreateMap<UserForRegistrationDto, User>();
         }
     }
 }
