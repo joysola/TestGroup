@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Shared.DataTransferObjects;
 using CompanyEmployees.Presentation.ModelBinders;
 using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CompanyEmployees.Presentation.Controllers
 {
@@ -29,6 +30,7 @@ namespace CompanyEmployees.Presentation.Controllers
         }
 
         [HttpGet(Name = "GetCompanies")]
+        [Authorize]
         public IActionResult GetCompanies()
         {
             //throw new Exception("Exception");
