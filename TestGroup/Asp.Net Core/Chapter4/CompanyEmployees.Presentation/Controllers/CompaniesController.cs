@@ -30,7 +30,8 @@ namespace CompanyEmployees.Presentation.Controllers
         }
 
         [HttpGet(Name = "GetCompanies")]
-        [Authorize]
+        //[Authorize]
+        [Authorize(Roles = "Manager")]
         public IActionResult GetCompanies()
         {
             //throw new Exception("Exception");

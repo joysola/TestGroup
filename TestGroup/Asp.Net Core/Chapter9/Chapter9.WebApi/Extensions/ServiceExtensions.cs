@@ -154,6 +154,7 @@ namespace Chapter9.WebApi
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+                    //ClockSkew= TimeSpan.FromSeconds(1),
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
