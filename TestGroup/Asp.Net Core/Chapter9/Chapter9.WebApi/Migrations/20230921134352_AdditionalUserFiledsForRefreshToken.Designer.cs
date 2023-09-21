@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository;
 
@@ -10,9 +11,11 @@ using Repository;
 namespace Chapter9.WebApi.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    partial class RepositoryContextModelSnapshot : ModelSnapshot
+    [Migration("20230921134352_AdditionalUserFiledsForRefreshToken")]
+    partial class AdditionalUserFiledsForRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -222,16 +225,14 @@ namespace Chapter9.WebApi.Migrations
                     b.HasData(
                         new
                         {
-                            //Id = "667a2370-d29d-464e-af95-6e322f41877a",
-                            Id = "674791cf-fba2-467f-911b-28a4a53eab87",
+                            Id = "667a2370-d29d-464e-af95-6e322f41877a",
                             ConcurrencyStamp = "2109a69f-2f08-4cea-9926-5c5659bd7218",
                             Name = "Manager",
                             NormalizedName = "MANAGER"
                         },
                         new
                         {
-                            //Id = "e9a89e3b-f06c-406b-84ae-57b7f0d1dff6",
-                            Id = "c8c4daa0-8e68-44ed-b69e-e7ad76a7d781",
+                            Id = "e9a89e3b-f06c-406b-84ae-57b7f0d1dff6",
                             ConcurrencyStamp = "6b503371-70b8-4c58-bea6-99c8a871631a",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
