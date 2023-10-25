@@ -146,7 +146,8 @@ namespace Chapter9.WebApi
         {
             //var jwtSettings = configuration.GetSection("JwtSettings");
             var jwtConfiguration = new JwtConfiguration();
-            configuration.Bind(jwtConfiguration.Section, jwtConfiguration);
+            //jwtConfiguration.Section = "JwtSettings";//"JwtAPI2Settings";
+            configuration.Bind(jwtConfiguration.Section, jwtConfiguration); // 把section的数据赋值给JwtConfiguration对象
             var secretKey = Environment.GetEnvironmentVariable("SECRET");
             services.AddAuthentication(opt =>
             {
@@ -175,7 +176,12 @@ namespace Chapter9.WebApi
         {
             services.Configure<JwtConfiguration>("JwtSettings", configuration.GetSection("JwtSettings"));
             services.Configure<JwtConfiguration>("JwtAPI2Settings", configuration.GetSection("JwtAPI2Settings"));
-            services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings"));
+            // 1. JwtAPI2Settings，JwtConfiguration除了section属性外，其他值都会获取到；
+            // 2. JwtSettings,如果在来一次services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings"))，则覆盖JwtAPI2Settings的效果
+            services.Configure<JwtConfiguration>(configuration.GetSection("JwtAPI2Settings")); // 必须注册，否则复发DI到构造器中，IOptionsMonitor<JwtConfiguration>类型对象就空了
+           // services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings")); // 必须注册，否则复发DI到构造器中，IOptionsMonitor<JwtConfiguration>类型对象就空了
+
+
         }
     }
 }
