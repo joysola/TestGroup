@@ -65,6 +65,7 @@ builder.Services.ConfigureHttpCacheHeaders();
 builder.Services.AddAuthentication();
 builder.Services.ConfigureIdentity();
 builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.AddJwtConfiguration(builder.Configuration);
 //builder.Services.AddControllers();
 
 var app = builder.Build();

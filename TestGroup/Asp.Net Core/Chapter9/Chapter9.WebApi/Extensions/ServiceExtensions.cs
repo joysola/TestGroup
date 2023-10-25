@@ -170,5 +170,12 @@ namespace Chapter9.WebApi
                 };
             });
         }
+
+        public static void AddJwtConfiguration(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<JwtConfiguration>("JwtSettings", configuration.GetSection("JwtSettings"));
+            services.Configure<JwtConfiguration>("JwtAPI2Settings", configuration.GetSection("JwtAPI2Settings"));
+            services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings"));
+        }
     }
 }
