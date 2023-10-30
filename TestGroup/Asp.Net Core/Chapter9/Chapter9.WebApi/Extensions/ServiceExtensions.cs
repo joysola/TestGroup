@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Entities.ConfigurationModels;
+using Microsoft.OpenApi.Models;
 
 namespace Chapter9.WebApi
 {
@@ -182,6 +183,24 @@ namespace Chapter9.WebApi
            // services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings")); // 必须注册，否则复发DI到构造器中，IOptionsMonitor<JwtConfiguration>类型对象就空了
 
 
+        }
+
+
+        public static void ConfigureSwagger(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(s =>
+            {
+                s.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Code Maze API",
+                    Version = "v1"
+                });
+                s.SwaggerDoc("v2", new OpenApiInfo
+                {
+                    Title = "Code Maze API",
+                    Version = "v2"
+                });
+            });
         }
     }
 }
