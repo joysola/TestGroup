@@ -32,7 +32,7 @@ namespace CompanyEmployees.Presentation.Controllers
 
         [HttpGet(Name = "GetCompanies")]
         //[Authorize]
-        [Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Manager")] // 需要在userrole中出现
         public IActionResult GetCompanies()
         {
             //throw new Exception("Exception");

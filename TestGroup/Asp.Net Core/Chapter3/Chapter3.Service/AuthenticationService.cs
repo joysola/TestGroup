@@ -38,7 +38,7 @@ namespace Service
             _userManager = userManager;
             _configuration = configuration;
             _jwtConfiguration = _configuration.CurrentValue/*_configuration.Value*/; // 单组配置
-            _jwtConfiguration = _configuration.Get("JwtAPI2Settings"); // 注册两组配置时
+            _jwtConfiguration = _configuration.Get("JwtSettings"); // 注册两组配置时
 
             //_jwtConfiguration = new JwtConfiguration();
             //_configuration.Bind(_jwtConfiguration.Section, _jwtConfiguration);

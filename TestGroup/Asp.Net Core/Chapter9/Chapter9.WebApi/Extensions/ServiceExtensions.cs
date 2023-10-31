@@ -180,7 +180,7 @@ namespace Chapter9.WebApi
             // 1. JwtAPI2Settings，JwtConfiguration除了section属性外，其他值都会获取到；
             // 2. JwtSettings,如果在来一次services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings"))，则覆盖JwtAPI2Settings的效果
             services.Configure<JwtConfiguration>(configuration.GetSection("JwtAPI2Settings")); // 必须注册，否则复发DI到构造器中，IOptionsMonitor<JwtConfiguration>类型对象就空了
-           // services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings")); // 必须注册，否则复发DI到构造器中，IOptionsMonitor<JwtConfiguration>类型对象就空了
+                                                                                               // services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings")); // 必须注册，否则复发DI到构造器中，IOptionsMonitor<JwtConfiguration>类型对象就空了
 
 
         }
@@ -199,6 +199,29 @@ namespace Chapter9.WebApi
                 {
                     Title = "Code Maze API",
                     Version = "v2"
+                });
+                s.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Place to add JWT with Bearer",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                s.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Name = "Bearer",
+                        },
+                        new List<string>()
+                    }
                 });
             });
         }
