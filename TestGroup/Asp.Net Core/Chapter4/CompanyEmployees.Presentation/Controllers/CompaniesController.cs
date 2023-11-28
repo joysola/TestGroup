@@ -9,6 +9,8 @@ using Shared.DataTransferObjects;
 using CompanyEmployees.Presentation.ModelBinders;
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
+using Entities.Responses;
+using CompanyEmployees.Presentation.Extensions;
 
 namespace CompanyEmployees.Presentation.Controllers
 {
@@ -17,7 +19,7 @@ namespace CompanyEmployees.Presentation.Controllers
     [ApiController]
     [ResponseCache(CacheProfileName = "120SecondsDuration")]
     [ApiExplorerSettings(GroupName = "v1")]
-    public class CompaniesController : ControllerBase
+    public class CompaniesController : ApiControllerBase//ControllerBase
     {
         private readonly IServiceManager _service;
         public CompaniesController(IServiceManager service) => _service = service;
@@ -29,6 +31,28 @@ namespace CompanyEmployees.Presentation.Controllers
             Response.Headers.Add("Allow", "GET, OPTIONS, POST");
             return Ok();
         }
+
+
+        [HttpGet]
+        public IActionResult GetCompanies2()
+        {
+            var baseResult = _service.CompanyService.GetAllCompanies2(trackChanges: false);
+            var companies = baseResult.GetResult<IEnumerable<CompanyDto>>();
+            return Ok(companies);
+        }
+
+        [HttpGet("{id:guid}")]
+        public IActionResult GetCompany2(Guid id)
+        {
+            var baseResult = _service.CompanyService.GetCompany2(id, trackChanges: false);
+            if (!baseResult.Success)
+                return ProcessError(baseResult);
+            var company = baseResult.GetResult<CompanyDto>();
+            return Ok(company);
+        }
+
+
+
         /// <summary>
         /// Gets the list of all companies
         /// </summary>

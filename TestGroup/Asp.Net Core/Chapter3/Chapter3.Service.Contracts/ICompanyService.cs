@@ -1,4 +1,5 @@
 ﻿using Entities;
+using Entities.Responses;
 using Shared.DataTransferObjects;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace Service.Contracts
         Task DeleteCompanyAsync(Guid companyId, bool trackChanges);
         Task UpdateCompanyAsync(Guid companyid, CompanyForUpdateDto companyForUpdate, bool trackChanges);
 
-
+        ApiBaseResponse GetAllCompanies2(bool trackChanges);
+        ApiBaseResponse GetCompany2(Guid companyId, bool trackChanges);
     }
 }

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Entities.Responses;
 
 namespace Service
 {
@@ -23,6 +24,21 @@ namespace Service
             _logger = logger;
             _mapper = mapper;
         }
+        public ApiBaseResponse GetAllCompanies2(bool trackChanges)
+        {
+            var companies = _repository.Company.GetAllCompanies(trackChanges);
+            var companiesDto = _mapper.Map<IEnumerable<CompanyDto>>(companies);
+            return new ApiOkResponse<IEnumerable<CompanyDto>>(companiesDto);
+        }
+        public ApiBaseResponse GetCompany2(Guid id, bool trackChanges)
+        {
+            var company = _repository.Company.GetCompany(id, trackChanges);
+            if (company is null)
+                return new CompanyNotFoundResponse(id);
+            var companyDto = _mapper.Map<CompanyDto>(company);
+            return new ApiOkResponse<CompanyDto>(companyDto);
+        }
+
         public IEnumerable<CompanyDto> GetAllCompanies(bool trackChanges)
         {
             //try
