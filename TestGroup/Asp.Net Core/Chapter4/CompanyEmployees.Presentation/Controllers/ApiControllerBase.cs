@@ -12,7 +12,14 @@ namespace CompanyEmployees.Presentation.Controllers
 {
     public class ApiControllerBase : ControllerBase
     {
-        public IActionResult ProcessError(ApiBaseResponse baseResponse)
+        /// <summary>
+        /// HandleError is a public method in your base class, right? Change it to [protected] and try again.
+        /// 否则swagger报错
+        /// </summary>
+        /// <param name="baseResponse"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        protected IActionResult ProcessError(ApiBaseResponse baseResponse)
         {
             return baseResponse switch
             {

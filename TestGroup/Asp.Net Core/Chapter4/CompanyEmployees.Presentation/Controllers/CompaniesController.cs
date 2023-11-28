@@ -29,11 +29,10 @@ namespace CompanyEmployees.Presentation.Controllers
         public IActionResult GetCompaniesOptions()
         {
             Response.Headers.Add("Allow", "GET, OPTIONS, POST");
-            return Ok();
+            return Ok(); 
         }
 
-
-        [HttpGet]
+        [HttpGet("2",Name = "GetCompanies2")]
         public IActionResult GetCompanies2()
         {
             var baseResult = _service.CompanyService.GetAllCompanies2(trackChanges: false);
@@ -41,7 +40,7 @@ namespace CompanyEmployees.Presentation.Controllers
             return Ok(companies);
         }
 
-        [HttpGet("{id:guid}")]
+        [HttpGet("2/{id:guid}" ,Name = "CompanyById2")]
         public IActionResult GetCompany2(Guid id)
         {
             var baseResult = _service.CompanyService.GetCompany2(id, trackChanges: false);
