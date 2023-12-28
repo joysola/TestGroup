@@ -11,6 +11,7 @@ using Service.DataShaping;
 using Shared.DataTransferObjects;
 using CompanyEmployees.Presentation.ActionFilters;
 using AspNetCoreRateLimit;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,7 @@ builder.Services.ConfigureVersioning();
 builder.Services.ConfigureResponseCaching();
 builder.Services.ConfigureHttpCacheHeaders();
 
+builder.Services.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(Application.AssemblyReference).Assembly));
 
 builder.Services.AddAuthentication();
 builder.Services.ConfigureIdentity();

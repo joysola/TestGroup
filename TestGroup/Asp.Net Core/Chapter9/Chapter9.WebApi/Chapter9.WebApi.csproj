@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Bonus\Application\Application\Application.csproj" />
     <ProjectReference Include="..\..\Chapter2\LoggerService\LoggerService.csproj" />
     <ProjectReference Include="..\..\Chapter3\Chapter3.Contracts\Contracts.csproj" />
     <ProjectReference Include="..\..\Chapter3\Chapter3.Service.Contracts\Service.Contracts.csproj" />

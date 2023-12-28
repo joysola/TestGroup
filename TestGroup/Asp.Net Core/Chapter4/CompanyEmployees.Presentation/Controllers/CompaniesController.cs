@@ -11,6 +11,7 @@ using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Entities.Responses;
 using CompanyEmployees.Presentation.Extensions;
+using MediatR;
 
 namespace CompanyEmployees.Presentation.Controllers
 {
@@ -22,8 +23,10 @@ namespace CompanyEmployees.Presentation.Controllers
     public class CompaniesController : ApiControllerBase//ControllerBase
     {
         private readonly IServiceManager _service;
-        public CompaniesController(IServiceManager service) => _service = service;
+        private readonly ISender _sender;
 
+        public CompaniesController(IServiceManager service) => _service = service;
+        public CompaniesController(ISender sender) => _sender = sender;
 
         [HttpOptions]
         public IActionResult GetCompaniesOptions()
