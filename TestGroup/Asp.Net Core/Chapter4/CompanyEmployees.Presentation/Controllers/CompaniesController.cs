@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Entities.Responses;
 using CompanyEmployees.Presentation.Extensions;
 using MediatR;
+using Application.Queries;
 
 namespace CompanyEmployees.Presentation.Controllers
 {
@@ -25,17 +26,21 @@ namespace CompanyEmployees.Presentation.Controllers
         private readonly IServiceManager _service;
         private readonly ISender _sender;
 
-        public CompaniesController(IServiceManager service) => _service = service;
-        public CompaniesController(ISender sender) => _sender = sender;
+        public CompaniesController(IServiceManager service, ISender sender)
+        {
+            _service = service;
+            _sender = sender;
+        }
+        //public CompaniesController(ISender sender) => 
 
         [HttpOptions]
         public IActionResult GetCompaniesOptions()
         {
             Response.Headers.Add("Allow", "GET, OPTIONS, POST");
-            return Ok(); 
+            return Ok();
         }
 
-        [HttpGet("2",Name = "GetCompanies2")]
+        [HttpGet("2", Name = "GetCompanies2")]
         public IActionResult GetCompanies2()
         {
             var baseResult = _service.CompanyService.GetAllCompanies2(trackChanges: false);
@@ -43,7 +48,7 @@ namespace CompanyEmployees.Presentation.Controllers
             return Ok(companies);
         }
 
-        [HttpGet("2/{id:guid}" ,Name = "CompanyById2")]
+        [HttpGet("2/{id:guid}", Name = "CompanyById2")]
         public IActionResult GetCompany2(Guid id)
         {
             var baseResult = _service.CompanyService.GetCompany2(id, trackChanges: false);
@@ -75,7 +80,12 @@ namespace CompanyEmployees.Presentation.Controllers
             //    return StatusCode(500, "Internal server error");
             //}
         }
-
+        [HttpGet("MR", Name = "GetCompaniesMediaR")]
+        public async Task<IActionResult> GetCompaniesMediaR()
+        {
+            var companies = await _sender.Send(new GetCompaniesQuery(TrackChanges: false));
+            return Ok(companies);
+        }
         //[HttpGet("{id:guid}", Name = "CompanyById")]
         //public IActionResult GetCompany(Guid id)
         //{
@@ -83,7 +93,12 @@ namespace CompanyEmployees.Presentation.Controllers
         //    return Ok(company);
         //}
 
-
+        [HttpGet("MR/{id:guid}", Name = "CompanyByIdMediaR")]
+        public async Task<IActionResult> GetCompanyMediaR(Guid id)
+        {
+            var company = await _sender.Send(new GetCompanyQuery(id, TrackChanges: false));
+            return Ok(company);
+        }
 
         //[ResponseCache(Duration = 60)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 60)]

@@ -63,6 +63,7 @@ builder.Services.ConfigureResponseCaching();
 builder.Services.ConfigureHttpCacheHeaders();
 
 builder.Services.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(Application.AssemblyReference).Assembly));
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddAuthentication();
 builder.Services.ConfigureIdentity();

@@ -4,6 +4,15 @@
         <name>CompanyEmployees.Presentation</name>
     </assembly>
     <members>
+        <member name="M:CompanyEmployees.Presentation.Controllers.ApiControllerBase.ProcessError(Entities.Responses.ApiBaseResponse)">
+            <summary>
+            HandleError is a public method in your base class, right? Change it to [protected] and try again.
+            否则swagger报错
+            </summary>
+            <param name="baseResponse"></param>
+            <returns></returns>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
         <member name="M:CompanyEmployees.Presentation.Controllers.CompaniesController.GetCompanies">
             <summary>
             Gets the list of all companies
