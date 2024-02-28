@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\Chapter3\Chapter3.Contracts\Contracts.csproj" />
     <ProjectReference Include="..\..\..\Chapter4\Shared\Shared.csproj" />
   </ItemGroup>

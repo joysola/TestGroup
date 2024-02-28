@@ -13,6 +13,7 @@ using Entities.Responses;
 using CompanyEmployees.Presentation.Extensions;
 using MediatR;
 using Application.Queries;
+using Application.Commands;
 
 namespace CompanyEmployees.Presentation.Controllers
 {
@@ -86,6 +87,7 @@ namespace CompanyEmployees.Presentation.Controllers
             var companies = await _sender.Send(new GetCompaniesQuery(TrackChanges: false));
             return Ok(companies);
         }
+        
         //[HttpGet("{id:guid}", Name = "CompanyById")]
         //public IActionResult GetCompany(Guid id)
         //{
@@ -98,6 +100,15 @@ namespace CompanyEmployees.Presentation.Controllers
         {
             var company = await _sender.Send(new GetCompanyQuery(id, TrackChanges: false));
             return Ok(company);
+        }
+
+        [HttpPost("MR",Name = "CreateCompanyMediaR")]
+        public async Task<IActionResult> CreateCompanyMediaR([FromBody] CompanyForCreationDto companyForCreationDto)
+        {
+            if (companyForCreationDto is null)
+                return BadRequest("CompanyForCreationDto object is null");
+            var company = await _sender.Send(new CreateCompanyCommand(companyForCreationDto));
+            return CreatedAtRoute("CompanyById", new { id = company.Id }, company);
         }
 
         //[ResponseCache(Duration = 60)]
