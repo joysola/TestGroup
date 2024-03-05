@@ -87,7 +87,7 @@ namespace CompanyEmployees.Presentation.Controllers
             var companies = await _sender.Send(new GetCompaniesQuery(TrackChanges: false));
             return Ok(companies);
         }
-        
+
         //[HttpGet("{id:guid}", Name = "CompanyById")]
         //public IActionResult GetCompany(Guid id)
         //{
@@ -102,13 +102,29 @@ namespace CompanyEmployees.Presentation.Controllers
             return Ok(company);
         }
 
-        [HttpPost("MR",Name = "CreateCompanyMediaR")]
+        [HttpPost("MR", Name = "CreateCompanyMediaR")]
         public async Task<IActionResult> CreateCompanyMediaR([FromBody] CompanyForCreationDto companyForCreationDto)
         {
             if (companyForCreationDto is null)
                 return BadRequest("CompanyForCreationDto object is null");
             var company = await _sender.Send(new CreateCompanyCommand(companyForCreationDto));
             return CreatedAtRoute("CompanyById", new { id = company.Id }, company);
+        }
+
+        [HttpPut("MR/{id:guid}", Name = "UpdateCompanyMediaR")]
+        public async Task<IActionResult> UpdateCompanyMediaR(Guid id, CompanyForUpdateDto companyForUpdateDto)
+        {
+            if (companyForUpdateDto is null)
+                return BadRequest("CompanyForUpdateDto object is null");
+            await _sender.Send(new UpdateCompanyCommand2(id, companyForUpdateDto, TrackChanges: true));
+            return NoContent();
+        }
+
+        [HttpDelete("MR/{id:guid}", Name = "UpdateCompanyMediaR")]
+        public async Task<IActionResult> DeleteCompanyMediaR(Guid id)
+        {
+            await _sender.Send(new DeleteCompanyCommand(id, TrackChanges: false));
+            return NoContent();
         }
 
         //[ResponseCache(Duration = 60)]
