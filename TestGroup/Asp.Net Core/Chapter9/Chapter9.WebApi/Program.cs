@@ -13,6 +13,8 @@ using CompanyEmployees.Presentation.ActionFilters;
 using AspNetCoreRateLimit;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
+using Application.Behaviors;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,7 +68,7 @@ builder.Services.ConfigureHttpCacheHeaders();
 builder.Services.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(Application.AssemblyReference).Assembly));
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddValidatorsFromAssembly(typeof(Application.AssemblyReference).Assembly);
-
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
 builder.Services.AddAuthentication();
 builder.Services.ConfigureIdentity();
