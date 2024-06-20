@@ -10,8 +10,8 @@ namespace TestBackupMysql
 {
     internal class BackupTest
     {
-        string _connectionString = "Server=192.168.13.6;port=3306;Database=polaritonlifedb4;user=root;pwd=root;SslMode=None;";
-        string _connectionString2 = "Server=192.168.13.6;port=3306;Database=polaritonlifedb3;user=root;pwd=root;SslMode=None;";
+        string _connectionString = "Server=192.168.13.6;port=3306;Database=polaritonlifedb4;user=root;pwd=root;SslMode=None;charset=utf8mb4;";
+        string _connectionString2 = "Server=192.168.13.6;port=3306;Database=polaritonlifedb3;user=root;pwd=root;SslMode=None;charset=utf8mb4;";
         internal Action<object, ExportProgressArgs> ExportProgressAct;
         internal Action<object, ImportProgressArgs> ImportProgressAct;
         public void Backup(string file)
@@ -23,6 +23,7 @@ namespace TestBackupMysql
                     using (MySqlBackup mb = new MySqlBackup(cmd))
                     {
                         mb.ExportProgressChanged += Mb_ExportProgressChanged;
+                        mb.ExportInfo.IntervalForProgressReport = 1000;
                         cmd.Connection = conn;
                         conn.Open();
                         mb.ExportToFile(file);
@@ -46,6 +47,7 @@ namespace TestBackupMysql
                     using (MySqlBackup mb = new MySqlBackup(cmd))
                     {
                         mb.ImportProgressChanged += Mb_ImportProgressChanged;
+                        mb.ImportInfo.IntervalForProgressReport = 1000;
                         cmd.Connection = conn;
                         conn.Open();
                         mb.ImportFromFile(file);
