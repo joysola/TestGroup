@@ -11,7 +11,7 @@ namespace TestBackupMysql
 {
     internal class BackupTest
     {
-        string _connectionStringExport = "Server=192.168.13.6;port=3306;Database=polaritonlifedb4;user=root;pwd=root;SslMode=None;charset=utf8mb4;";
+        string _connectionStringExport = "Server=192.168.13.6;port=3306;Database=polaritonlifedb3;user=root;pwd=root;SslMode=None;charset=utf8mb4;";
         string _connectionStringImport = "Server=192.168.13.6;port=3306;Database=polaritonlifedb;user=root;pwd=root;SslMode=None;charset=utf8mb4;";
         internal Action<object, ExportProgressArgs> ExportProgressAct;
         internal Action<object, ImportProgressArgs> ImportProgressAct;

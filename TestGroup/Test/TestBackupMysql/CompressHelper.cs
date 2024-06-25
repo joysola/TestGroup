@@ -9,6 +9,34 @@ namespace TestBackupMysql
 {
     internal class CompressHelper
     {
+        public static async Task<bool> CompressData(string sourceFile, string destination)
+        {
+            var result = false;
+            using (FileStream fs = new(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read, 4 * 1024, FileOptions.Asynchronous))
+            using (FileStream output = new(destination, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite, 1024, FileOptions.Asynchronous))
+            using (DeflateStream dstream = new(output, CompressionLevel.Optimal))
+            {
+                await fs.CopyToAsync(dstream);
+                result = true;
+            }
+            return result;
+        }
+
+        public static async Task<bool> DecompressData(string sourceFile, string destination)
+        {
+            var result = false;
+            using (FileStream fs = new(sourceFile, FileMode.Open, FileAccess.Read, FileShare.Read, 4 * 1024, FileOptions.Asynchronous))
+            using (FileStream output = new(destination, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite, 1024, FileOptions.Asynchronous))
+            using (DeflateStream dstream = new(fs, CompressionMode.Decompress))
+            {
+                await dstream.CopyToAsync(output);
+                result = true;
+            }
+            return result;
+        }
+
+
+
         public byte[] CompressData(byte[] data)
         {
             MemoryStream output = new MemoryStream();

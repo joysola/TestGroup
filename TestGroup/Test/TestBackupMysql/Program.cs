@@ -3,11 +3,12 @@ namespace TestBackupMysql
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
             //var file = ".\\backup\\20240619174935.sql";//$".\\{DateTime.Now:yyyyMMddHHmmssfff}.sql";
-            var file2 = $".\\backup\\{DateTime.Now:yyyyMMddHHmmssfff}.pl";
+            var file2 = $".\\backup\\{DateTime.Now:yyyyMMddHHmmssfff}.sql";
+            //var file2 = $".\\backup\\20240625172505346.sql";
             var fileDir = ".\\backup\\";
             var zipfile = ".\\20240619174935.zip";
             var test = new BackupTest();
@@ -37,7 +38,27 @@ namespace TestBackupMysql
                 Console.WriteLine($"Pack:{e.PercentComplete}");
             };
 
+
+
+
+            test.Backup(file2);
+            var packFile = $"{file2}.pack";
+            await CompressHelper.CompressData(file2, packFile);
+            var encFile = $"{packFile}.enc";
+            await AESHelper.AES_Encrypt(packFile, encFile, password);
+
+            var decFile = $"{packFile}.dec";
+            await AESHelper.AES_Decrypt(encFile, decFile, password);
+
+            var unpackFile = $"{file2}.unpack";
+            await CompressHelper.DecompressData(decFile, unpackFile);
+
+            test.Restore(unpackFile);
+
+
             test.BackupAES(file2, password);
+
+
 
             Console.WriteLine($"{file2} backup completed!");
 
