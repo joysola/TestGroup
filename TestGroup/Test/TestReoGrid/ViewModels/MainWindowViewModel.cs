@@ -37,6 +37,7 @@ namespace TestReoGrid
             Sheet = reoGrid.CurrentWorksheet;
             InitSetting(reoGrid);
             RowCol();
+            Freeze();
             Data();
         }
 
@@ -48,9 +49,18 @@ namespace TestReoGrid
         [RelayCommand]
         private void SetFilter()
         {
-            var slectedItems = PropFilter.Columns["B"].SelectedTextItems;
-            slectedItems.Clear();
-            slectedItems.AddRange([SelectedFilterCol]);
+            PropFilter?.Detach();
+            PropFilter = Sheet.CreateColumnFilter("B", "B", 0, unvell.ReoGrid.Data.AutoColumnFilterUI.NoGUI);
+            var selectedItems = PropFilter.Columns["B"].SelectedTextItems;
+            selectedItems.Clear();
+            if (SelectedFilterCol is { Length: > 0 })
+            {
+                selectedItems.AddRange([SelectedFilterCol]);
+            }
+            else
+            {
+                selectedItems.AddRange(FilterColumns);
+            }
             PropFilter.Apply();
         }
 
@@ -79,8 +89,16 @@ namespace TestReoGrid
             propHeader.Text = "Properties";
             propHeader.IsAutoWidth = true;
 
-            PropFilter = Sheet.CreateColumnFilter("B", "B", 0, unvell.ReoGrid.Data.AutoColumnFilterUI.NoGUI);
         }
+
+
+        private void Freeze()
+        {
+            // 冻结到序号2列
+            Sheet.FreezeToCell(0, 2, FreezeArea.Left);
+            //Sheet.Unfreeze();
+        }
+
 
         private void Data()
         {
