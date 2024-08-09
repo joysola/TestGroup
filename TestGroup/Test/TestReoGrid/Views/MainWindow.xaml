@@ -1,0 +1,44 @@
+﻿<Window x:Class="TestReoGrid.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:reoGrid="clr-namespace:unvell.ReoGrid;assembly=unvell.ReoGrid"
+        xmlns:local="clr-namespace:TestReoGrid"
+        xmlns:vm="clr-namespace:TestReoGrid"
+        d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
+        mc:Ignorable="d"
+        Title="MainWindow"
+        Height="450"
+        Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                    Command="{Binding SetFilterCommand}"
+                    Content="Test" />
+            <hc:ComboBox Style="{StaticResource ComboBoxPlus.Small}"
+                         hc:InfoElement.ShowClearButton="True"
+                         ItemsSource="{Binding FilterColumns}"
+                         d:ItemsSource="{d:SampleData ItemCount=6}"
+                         SelectedItem="{Binding SelectedFilterCol}"
+                         MinWidth="100"
+                         Margin="20,0,0,0" />
+        </StackPanel>
+
+        <reoGrid:ReoGridControl Grid.Row="99"
+                                x:Name="ReoGrid">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Loaded">
+                    <i:InvokeCommandAction Command="{Binding LoadReoGridCommand}"
+                                           CommandParameter="{Binding ElementName=ReoGrid}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </reoGrid:ReoGridControl>
+    </Grid>
+</Window>
