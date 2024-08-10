@@ -15,6 +15,9 @@ namespace TestReoGrid
 {
     public partial class MainWindowViewModel : ObservableRecipient
     {
+        private const string Channels = "Channels";
+        private const string Props = "Props";
+
         [ObservableProperty]
         private ReoGridControl _reoGrid;
 
@@ -30,6 +33,14 @@ namespace TestReoGrid
         [ObservableProperty]
         private string _selectedFilterCol;
 
+        [ObservableProperty]
+        private NamedRange _channelsRange;
+
+
+        [ObservableProperty]
+        private NamedRange _propRange;
+
+
         [RelayCommand]
         private void LoadReoGrid(ReoGridControl reoGrid)
         {
@@ -38,6 +49,7 @@ namespace TestReoGrid
             InitSetting(reoGrid);
             RowCol();
             Freeze();
+            CreateRanges();
             Data();
         }
 
@@ -102,14 +114,34 @@ namespace TestReoGrid
 
         private void Data()
         {
-            //Sheet["A1:A8"]
+            //var channels = new List<string>();
+            //for (int i = 0; i < 8; i++)
+            //{
+            //    channels.Add($"Channel{i + 1}");
+            //}
+            //Sheet["A1:A8"] = channels;
+            //Sheet["B1:B8"] = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" };
+        }
+
+
+
+        private void CreateRanges()
+        {
+            ChannelsRange = Sheet.DefineNamedRange(Channels, "A1:A8");
+            ChannelsRange.IsReadonly = true;
+
             var channels = new List<string>();
             for (int i = 0; i < 8; i++)
             {
                 channels.Add($"Channel{i + 1}");
             }
-            Sheet["A1:A8"] = channels;
-            Sheet["B1:B8"] = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" };
+            ChannelsRange.Data = channels;
+
+
+            PropRange = Sheet.DefineNamedRange(Props, "B1:B8");
+            PropRange.IsReadonly = true;
+
+            PropRange.Data = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" }; ;
         }
     }
 }
