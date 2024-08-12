@@ -21,8 +21,11 @@ namespace TestReoGrid.Helpers
             new PL_Exp_Channel { Channel_No = 7, Channel_Name = "Channel8", Is_Selected = true },
         ];
 
-
-        public List<SerialSolutionChannel> GenerateSerialDatas()
+        /// <summary>
+        /// serial 数据生成
+        /// </summary>
+        /// <returns></returns>
+        public static List<SerialSolutionChannel> GenerateSerialDatas()
         {
             List<SerialSolutionChannel> result = [];
             var channels = Channels;
@@ -71,5 +74,7 @@ namespace TestReoGrid.Helpers
             }
             return result;
         }
+
+
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using TestReoGrid.Helpers;
 using unvell.ReoGrid;
 using unvell.ReoGrid.Data;
 
@@ -90,8 +91,8 @@ namespace TestReoGrid
 
         private void RowCol()
         {
-            Sheet.SetRows(8);
-            Sheet.SetCols(10);
+            //Sheet.SetRows(8);
+            //Sheet.SetCols(10);
 
 
             var channelHeader = Sheet.GetColumnHeader(0);
@@ -142,6 +143,29 @@ namespace TestReoGrid
             PropRange.IsReadonly = true;
 
             PropRange.Data = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" }; ;
+        }
+
+
+        private void CreateSerialDatas()
+        {
+            var serialChs = DataGenerateHelper.GenerateSerialDatas();
+            var rows = 0;
+            foreach (var ch in serialChs)
+            {
+                if (ch.ChannelInfo.Is_Selected)
+                {
+                    var rowCount = ch.SolutionParamList.Count;
+                    rows += rowCount;
+
+
+                    //var chRange = Sheet.DefineNamedRange(ch.ChannelInfo.Channel_Name,);
+                }
+                //else
+                //{
+
+                //}
+            }
+            var cell = Sheet.GetCell("A1");
         }
     }
 }
