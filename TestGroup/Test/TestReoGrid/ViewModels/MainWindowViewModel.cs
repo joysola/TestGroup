@@ -41,6 +41,11 @@ namespace TestReoGrid
         [ObservableProperty]
         private NamedRange _propRange;
 
+        /// <summary>
+        /// Serial 命名Range集合
+        /// </summary>
+        public List<NamedRange> SerialNamedRanges { get; set; } = [];
+
 
         [RelayCommand]
         private void LoadReoGrid(ReoGridControl reoGrid)
@@ -52,6 +57,10 @@ namespace TestReoGrid
             Freeze();
             CreateRanges();
             Data();
+
+            //
+            SerialNamedRanges = DataGenerateHelper.CreateNamedRanges(Sheet);
+
         }
 
 
@@ -130,6 +139,7 @@ namespace TestReoGrid
         {
             ChannelsRange = Sheet.DefineNamedRange(Channels, "A1:A8");
             ChannelsRange.IsReadonly = true;
+            ChannelsRange.Comment = "123";
 
             var channels = new List<string>();
             for (int i = 0; i < 8; i++)
@@ -146,26 +156,6 @@ namespace TestReoGrid
         }
 
 
-        private void CreateSerialDatas()
-        {
-            var serialChs = DataGenerateHelper.GenerateSerialDatas();
-            var rows = 0;
-            foreach (var ch in serialChs)
-            {
-                if (ch.ChannelInfo.Is_Selected)
-                {
-                    var rowCount = ch.SolutionParamList.Count;
-                    rows += rowCount;
 
-
-                    //var chRange = Sheet.DefineNamedRange(ch.ChannelInfo.Channel_Name,);
-                }
-                //else
-                //{
-
-                //}
-            }
-            var cell = Sheet.GetCell("A1");
-        }
     }
 }
