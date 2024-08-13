@@ -70,7 +70,7 @@ namespace TestReoGrid.Helpers
                 var massConcSP = new SolutionParam()
                 {
                     ParamName = nameof(PL_Exp_Dsgn_Inject.Mass_concentration),
-                    ParamAlias ="Mass Conc.",
+                    ParamAlias = "Mass Conc.",
                     ParamType = typeof(double),
                     VarType = VarTypeEnum.Solution,
                     //ValidationKey = , // 验证校验
@@ -198,7 +198,7 @@ namespace TestReoGrid.Helpers
             sheet.SetColumnsWidth(0, 1, 120);
             sheet.SetColumnsWidth(1, 1, 100);
 
-            // 
+            // 填充部分数据
             for (int i = 0; i < serial.ChNamedRanges.Count; i++)
             {
                 // 1-1 channel的范围1格
@@ -218,6 +218,15 @@ namespace TestReoGrid.Helpers
                     var propR = serial.PropNamedRanges[j];
                     propR.Data = $"{serial.PropRows[j].ParamAlias}";
                     propR.IsReadonly = true;
+
+                    // 1-3. val的范围1格
+                    for (int k = 0; k < serial.ValNamedRanges.Count; k++)
+                    {
+                        var valR = serial.ValNamedRanges[k];
+                        var valD = serial.ValCells[k];
+
+                        valR.Data = new[] { valD.ParamValue };
+                    }
                 }
             }
         }
