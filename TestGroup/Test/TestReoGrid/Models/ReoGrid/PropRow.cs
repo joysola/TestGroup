@@ -13,7 +13,7 @@ namespace TestReoGrid.Models
         public int ColStart { get; set; }
         public int ColEnd { get; set; }
         public int Rows => 1;
-        public int Cols => ColEnd == 0 ? 0 : ColEnd - ColStart + 1;
+        public int Cols =>  ColEnd - ColStart + 1;
         public List<ValueCell> Cells { get; set; } = [];
     }
 }

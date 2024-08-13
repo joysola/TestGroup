@@ -23,27 +23,6 @@ namespace TestReoGrid.Helpers
             new PL_Exp_Channel { Channel_No = 7, Channel_Name = "Channel8", Is_Selected = true },
         ];
 
-        //private void CreateSerialDatas()
-        //{
-        //    var serialChs = DataGenerateHelper.GenerateSerialDatas();
-        //    var rows = 0;
-        //    foreach (var ch in serialChs)
-        //    {
-        //        if (ch.ChannelInfo.Is_Selected)
-        //        {
-        //            var rowCount = ch.SolutionParamList.Count;
-        //            rows += rowCount;
-
-
-        //            //var chRange = Sheet.DefineNamedRange(ch.ChannelInfo.Channel_Name,);
-        //        }
-        //        //else
-        //        //{
-
-        //        //}
-        //    }
-        //    var cell = Sheet.GetCell("A1");
-        //}
 
         #region Serial
         /// <summary>
@@ -64,6 +43,7 @@ namespace TestReoGrid.Helpers
                 var nameSP = new SolutionParam()
                 {
                     ParamName = nameof(PL_Exp_Dsgn_Inject.Solution_Name),
+                    ParamAlias = "Name",
                     ParamType = typeof(string),
                     VarType = VarTypeEnum.Solution,
                     //ValidationKey = , // 验证校验
@@ -72,6 +52,7 @@ namespace TestReoGrid.Helpers
                 var ConcSP = new SolutionParam()
                 {
                     ParamName = nameof(PL_Exp_Dsgn_Inject.Concentration),
+                    ParamAlias = "Conc.",
                     ParamType = typeof(double),
                     VarType = VarTypeEnum.Solution,
                     //ValidationKey = , // 验证校验
@@ -80,6 +61,7 @@ namespace TestReoGrid.Helpers
                 var MWSP = new SolutionParam()
                 {
                     ParamName = nameof(PL_Exp_Dsgn_Inject.Molecular_Weight),
+                    ParamAlias = "MW",
                     ParamType = typeof(int),
                     VarType = VarTypeEnum.Solution,
                     //ValidationKey = , // 验证校验
@@ -88,6 +70,7 @@ namespace TestReoGrid.Helpers
                 var massConcSP = new SolutionParam()
                 {
                     ParamName = nameof(PL_Exp_Dsgn_Inject.Mass_concentration),
+                    ParamAlias ="Mass Conc.",
                     ParamType = typeof(double),
                     VarType = VarTypeEnum.Solution,
                     //ValidationKey = , // 验证校验
@@ -122,15 +105,18 @@ namespace TestReoGrid.Helpers
             return result;
         }
 
-
+        /// <summary>
+        /// !!!
+        /// </summary>
+        /// <param name="rowCount"></param>
+        /// <param name="colCount"></param>
+        /// <returns></returns>
         private static List<ChannelRange> CreateSerialDatas(int rowCount, int colCount)
         {
             var result = new List<ChannelRange>();
             List<SerialSolutionChannel> rawDatas = CreateRawDatas();
             var newDatas = CreateSerialDatas(rawDatas);
 
-            var rows = 1;
-            var cols = 1;
             var rowMax = rowCount;
             var colMax = colCount;
             for (int r = 0; r < newDatas.Count; r++)
@@ -138,13 +124,13 @@ namespace TestReoGrid.Helpers
                 var preRows = 0;
                 if (r > 0)
                 {
-                    preRows = newDatas[r - 1].RowEnd;
+                    preRows = newDatas[r - 1].RowEnd + 1;
                 }
                 var ch = newDatas[r];
-                ch.RowStart = preRows + 1;
+                ch.RowStart = preRows/* + 1*/; // 从0开始算
                 ch.RowEnd = ch.RowStart + ch.Props.Count - 1;
-                ch.ColStart = 1;
-                ch.ColEnd = colMax;
+                ch.ColStart = 0/*1*/;
+                ch.ColEnd = 0;
 
                 ch.NameKey = $"{ch.ChannelInfo.Channel_No}";
 
@@ -153,7 +139,7 @@ namespace TestReoGrid.Helpers
                     var prop = ch.Props[i];
                     prop.RowStart = ch.RowStart + i;
                     prop.ColStart = ch.ColStart + 1;
-                    prop.ColEnd = ch.ColEnd;
+                    prop.ColEnd = prop.ColStart;//ch.ColEnd;
 
                     prop.NameKey = $"{ch.NameKey}@{prop.ParamName}";
                     for (int j = 0; j < prop.Cells.Count; j++)
@@ -170,36 +156,72 @@ namespace TestReoGrid.Helpers
         }
 
 
-        private static List<NamedRange> CreateNamedRanges(List<ChannelRange> channelRanges, Worksheet sheet)
+        private static SerialRange CreateSerialNamedRanges(List<ChannelRange> channelRanges, Worksheet sheet)
         {
-            List<NamedRange> namedRanges = [];
+            SerialRange serial = new();
             if (channelRanges?.Count > 0)
             {
                 foreach (var ch in channelRanges)
                 {
+                    serial.ChRanges.Add(ch);
                     var chRange = sheet.DefineNamedRange(ch.NameKey, ch.RowStart, ch.ColStart, ch.Rows, ch.Cols);
-                    namedRanges.Add(chRange);
+                    serial.ChNamedRanges.Add(chRange);
+
                     foreach (var p in ch.Props)
                     {
+                        serial.PropRows.Add(p);
                         var pRange = sheet.DefineNamedRange(p.NameKey, p.RowStart, p.ColStart, p.Rows, p.Cols);
-                        namedRanges.Add(pRange);
+                        serial.PropNamedRanges.Add(pRange);
                         foreach (var v in p.Cells)
                         {
+                            serial.ValCells.Add(v);
                             var vRange = sheet.DefineNamedRange(v.NameKey, v.RowStart, v.ColStart, v.Rows, v.Cols);
-                            namedRanges.Add(vRange);
+                            serial.ValNamedRanges.Add(vRange);
                         }
                     }
                 }
             }
-            return namedRanges;
+            return serial;
         }
 
 
-        public static List<NamedRange> CreateNamedRanges(Worksheet sheet)
+        public static SerialRange CreateNamedRanges(Worksheet sheet)
         {
             var channelRanges = CreateSerialDatas(sheet.RowCount, sheet.ColumnCount);
-            return CreateNamedRanges(channelRanges, sheet);
+            return CreateSerialNamedRanges(channelRanges, sheet);
         }
+
+
+        public static void InitSerial(SerialRange serial, Worksheet sheet)
+        {
+            // 设置列宽（前两列需要加宽）
+            sheet.SetColumnsWidth(0, 1, 120);
+            sheet.SetColumnsWidth(1, 1, 100);
+
+            // 
+            for (int i = 0; i < serial.ChNamedRanges.Count; i++)
+            {
+                // 1-1 channel的范围1格
+                var chR = serial.ChNamedRanges[i];
+                var chD = serial.ChRanges[i];
+
+                chR.Style.HorizontalAlign = ReoGridHorAlign.Center;
+                chR.Style.VerticalAlign = ReoGridVerAlign.Middle;
+                chR.IsReadonly = true;
+                // 合并成1列
+                sheet.MergeRange(chR);
+                chR.Data = new[] { $"channel{serial.ChRanges[i].ChannelInfo.Channel_No + 1}" };
+
+                for (int j = 0; j < serial.PropNamedRanges.Count; j++)
+                {
+                    // 1-2. Prop的范围1格
+                    var propR = serial.PropNamedRanges[j];
+                    propR.Data = $"{serial.PropRows[j].ParamAlias}";
+                    propR.IsReadonly = true;
+                }
+            }
+        }
+
         #endregion Serial
     }
 }

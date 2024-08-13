@@ -16,8 +16,8 @@ namespace TestReoGrid.Models
         public int ColStart { get; set; }
         public int ColEnd { get; set; }
 
-        public int Rows => RowEnd == 0 ? 0 : RowEnd - RowStart + 1;
-        public int Cols => ColEnd == 0 ? 0 : ColEnd - ColStart + 1;
+        public int Rows =>  RowEnd - RowStart + 1;
+        public int Cols =>  ColEnd - ColStart + 1;
 
         public List<PropRow> Props { get; set; } = [];
     }

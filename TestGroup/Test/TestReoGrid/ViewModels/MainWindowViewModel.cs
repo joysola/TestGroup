@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using TestReoGrid.Helpers;
+using TestReoGrid.Models;
 using unvell.ReoGrid;
 using unvell.ReoGrid.Data;
 
@@ -44,7 +45,7 @@ namespace TestReoGrid
         /// <summary>
         /// Serial 命名Range集合
         /// </summary>
-        public List<NamedRange> SerialNamedRanges { get; set; } = [];
+        public SerialRange Serial { get; set; }
 
 
         [RelayCommand]
@@ -53,14 +54,14 @@ namespace TestReoGrid
             ReoGrid = reoGrid;
             Sheet = reoGrid.CurrentWorksheet;
             InitSetting(reoGrid);
-            RowCol();
+            //RowCol();
             Freeze();
-            CreateRanges();
+           // CreateRanges();
             Data();
 
             //
-            SerialNamedRanges = DataGenerateHelper.CreateNamedRanges(Sheet);
-
+            Serial = DataGenerateHelper.CreateNamedRanges(Sheet);
+            DataGenerateHelper.InitSerial(Serial, Sheet);
         }
 
 
