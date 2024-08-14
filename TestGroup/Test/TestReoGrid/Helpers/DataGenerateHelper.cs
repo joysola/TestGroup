@@ -194,11 +194,11 @@ namespace TestReoGrid.Helpers
 
         public static void InitSerial(SerialRange serial, Worksheet sheet)
         {
-            // 设置列宽（前两列需要加宽）
+            // 1. 设置列宽（前两列需要加宽）
             sheet.SetColumnsWidth(0, 1, 120);
             sheet.SetColumnsWidth(1, 1, 100);
 
-            // 填充部分数据
+            // 2. 填充部分数据
             for (int i = 0; i < serial.ChNamedRanges.Count; i++)
             {
                 // 1-1 channel的范围1格
@@ -229,7 +229,17 @@ namespace TestReoGrid.Helpers
                     }
                 }
             }
+
+            // 3. 调整sheet的最大行数
+            var rows = serial.ChRanges.Max(x => x.RowEnd) + 1;
+            sheet.SetRows(rows);
         }
+
+        public static void GetSerialData(SerialRange serial, Worksheet sheet)
+        {
+
+        }
+
 
         #endregion Serial
     }
