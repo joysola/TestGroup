@@ -263,6 +263,8 @@ namespace TestReoGrid.Helpers
                 {
                     var prop = ch.SolutionParamList[i];
                     prop.RowStart = ch.RowStart + i;
+                    prop.RowEnd = prop.RowStart;
+
                     prop.ColStart = ch.ColStart + 1;
                     prop.ColEnd = prop.ColStart;//ch.ColEnd;
 

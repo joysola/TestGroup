@@ -69,7 +69,64 @@ namespace TestReoGrid
             DataGenerateHelper.InitSerial(Serial, Sheet);
 
             Sheet.CellDataChanged += Sheet_CellDataChanged;
+            Sheet.AfterPaste += Sheet_AfterPaste;
+            //Sheet.AfterCellEdit += Sheet_AfterCellEdit;
+
         }
+
+        private void Sheet_AfterPaste(object sender, unvell.ReoGrid.Events.RangeEventArgs e)
+        {
+            
+        }
+
+        private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
+        {
+            if (e.Cell is not null)
+            {
+                var data = e.Cell.Data;
+                var col = e.Cell.Column;
+                var row = e.Cell.Row;
+
+                var pRow = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).FirstOrDefault(x => x.RowStart == row);
+                if (pRow is not null)
+                {
+                    var cell = pRow.ParamValues.FirstOrDefault(x => x.ColStart == col);
+                    if (cell is null)
+                    {
+                        pRow.ParamValues.Add(new SolutionParamValue()
+                        {
+                            NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
+                            RowStart = pRow.RowStart,
+                            RowEnd = pRow.RowStart,
+                            ColStart = col,
+                            ColEnd = col,
+                            ParamName = pRow.ParamName,
+                            ParamValue = $"{data}",
+                        });
+                    }
+                    else
+                    {
+                        if (data is null)
+                        {
+                            pRow.ParamValues.Remove(cell);
+                        }
+                        else
+                        {
+                            cell.ParamValue = $"{data}";
+                        }
+                    }
+                }
+            }
+        }
+        //private void Sheet_CellEditCharInputed(object sender, unvell.ReoGrid.Events.CellEditCharInputEventArgs e)
+        //{
+        //    Sheet_CellDataChanged(null, e);
+        //}
+
+        //private void Sheet_AfterCellEdit(object sender, unvell.ReoGrid.Events.CellAfterEditEventArgs e)
+        //{
+        //    Sheet_CellDataChanged(null, e);
+        //}
 
 
         //private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
@@ -110,43 +167,7 @@ namespace TestReoGrid
         //    }
         //}
 
-        private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
-        {
-            if (e.Cell is not null)
-            {
-                var data = e.Cell.Data;
-                var col = e.Cell.Column;
-                var row = e.Cell.Row;
 
-                var pRow = Serial.SolutionChannels.SelectMany(x=>x.SolutionParamList).FirstOrDefault(x => x.RowStart == row);
-                if (pRow is not null)
-                {
-                    var cell = pRow.ParamValues.FirstOrDefault(x => x.ColStart == col);
-                    if (cell is null)
-                    {
-                        pRow.ParamValues.Add(new SolutionParamValue()
-                        {
-                            NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
-                            RowStart = pRow.RowStart,
-                            ColStart = col,
-                            ParamName = pRow.ParamName,
-                            ParamValue = $"{data}",
-                        });
-                    }
-                    else
-                    {
-                        if (data is null)
-                        {
-                            pRow.ParamValues.Remove(cell);
-                        }
-                        else
-                        {
-                            cell.ParamValue = $"{data}";
-                        }
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// WPF 没有相应的界面
