@@ -47,7 +47,11 @@ namespace TestReoGrid
         /// </summary>
         public SerialRange Serial { get; set; }
 
-
+        #region Commands
+        /// <summary>
+        /// Load
+        /// </summary>
+        /// <param name="reoGrid"></param>
         [RelayCommand]
         private void LoadReoGrid(ReoGridControl reoGrid)
         {
@@ -56,12 +60,51 @@ namespace TestReoGrid
             InitSetting(reoGrid);
             //RowCol();
             Freeze();
-           // CreateRanges();
+            // CreateRanges();
             Data();
 
             //
             Serial = DataGenerateHelper.CreateNamedRanges(Sheet);
             DataGenerateHelper.InitSerial(Serial, Sheet);
+
+            Sheet.CellDataChanged += Sheet_CellDataChanged;
+        }
+
+
+        private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
+        {
+            if (e.Cell is not null)
+            {
+                var data = e.Cell.Data;
+                var col = e.Cell.Column;
+                var pRow = Serial.PropRows.FirstOrDefault(x => x.RowStart == e.Cell.Row);
+                if (pRow is not null)
+                {
+                    var cell = pRow.Cells.FirstOrDefault(x => x.ColStart == col);
+                    if (cell is null)
+                    {
+                        pRow.Cells.Add(new ValueCell()
+                        {
+                            NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
+                            RowStart = pRow.RowStart,
+                            ColStart = col,
+                            ParamName = pRow.ParamName,
+                            ParamValue = $"{data}",
+                        });
+                    }
+                    else
+                    {
+                        if (data is null)
+                        {
+                            pRow.Cells.Remove(cell);
+                        }
+                        else
+                        {
+                            cell.ParamValue = $"{data}";
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -87,6 +130,17 @@ namespace TestReoGrid
             PropFilter.Apply();
         }
 
+
+        [RelayCommand]
+        private void GetSerialData()
+        {
+            // 结束编辑
+            Sheet.EndEdit(EndEditReason.NormalFinish);
+            DataGenerateHelper.GetSerialData(Serial, Sheet);
+        }
+
+
+        #endregion Commands
 
         private void InitSetting(ReoGridControl reoGrid)
         {

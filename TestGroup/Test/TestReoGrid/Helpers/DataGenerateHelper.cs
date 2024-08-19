@@ -235,9 +235,32 @@ namespace TestReoGrid.Helpers
             sheet.SetRows(rows);
         }
 
-        public static void GetSerialData(SerialRange serial, Worksheet sheet)
-        {
+        private static readonly IMapper _mapper = new Mapper();
 
+
+        public static List<SerialSolutionChannel> GetSerialData(SerialRange serial, Worksheet sheet)
+        {
+            var result = new List<SerialSolutionChannel>();
+            if (serial is not null && sheet is not null)
+            {
+                foreach (var rCh in serial.ChRanges)
+                {
+                    var newCh = _mapper.Map<SerialSolutionChannel>(rCh);
+                    newCh.SolutionParamList.Clear();
+                    foreach (var rP in rCh.Props)
+                    {
+                        var sp = _mapper.Map<SolutionParam>(rP);
+                        foreach (var rC in rP.Cells)
+                        {
+                            var spv = _mapper.Map<SolutionParamValue>(rC);
+                            sp.ParamValues.Add(spv);
+                        }
+                        newCh.SolutionParamList.Add(sp);
+                    }
+                    result.Add(newCh);
+                }
+            }
+            return result;
         }
 
 
