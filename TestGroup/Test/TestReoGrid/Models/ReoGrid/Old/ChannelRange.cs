@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestReoGrid.Models
+namespace TestReoGrid.Models.ReoGrid.Old
 {
-    public class ChannelRange : SerialSolutionChannel
+    public class ChannelRange //: SerialSolutionChannel
     {
         public string NameKey { get; set; }
 
@@ -16,8 +16,8 @@ namespace TestReoGrid.Models
         public int ColStart { get; set; }
         public int ColEnd { get; set; }
 
-        public int Rows =>  RowEnd - RowStart + 1;
-        public int Cols =>  ColEnd - ColStart + 1;
+        public int Rows => RowEnd - RowStart + 1;
+        public int Cols => ColEnd - ColStart + 1;
 
         public List<PropRow> Props { get; set; } = [];
     }

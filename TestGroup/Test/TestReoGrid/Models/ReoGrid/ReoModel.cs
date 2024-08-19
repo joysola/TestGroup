@@ -6,14 +6,17 @@ using System.Threading.Tasks;
 
 namespace TestReoGrid.Models
 {
-    public partial class PropRow : SolutionParam
+    public interface IReoModel
     {
         public string NameKey { get; set; }
+
         public int RowStart { get; set; }
+        public int RowEnd { get; set; }
+
         public int ColStart { get; set; }
         public int ColEnd { get; set; }
-        public int Rows => 1;
-        public int Cols =>  ColEnd - ColStart + 1;
-        public List<ValueCell> Cells { get; set; } = [];
+
+        public int Rows => RowEnd - RowStart + 1;
+        public int Cols => ColEnd - ColStart + 1;
     }
 }

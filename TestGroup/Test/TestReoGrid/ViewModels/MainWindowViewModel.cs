@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using TestReoGrid.Helpers;
 using TestReoGrid.Models;
+using TestReoGrid.Models.ReoGrid.Old;
 using unvell.ReoGrid;
 using unvell.ReoGrid.Data;
 
@@ -71,19 +72,59 @@ namespace TestReoGrid
         }
 
 
+        //private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
+        //{
+        //    if (e.Cell is not null)
+        //    {
+        //        var data = e.Cell.Data;
+        //        var col = e.Cell.Column;
+        //        var row = e.Cell.Row;
+
+        //        var pRow = Serial.PropRows.FirstOrDefault(x => x.RowStart == e.Cell.Row);
+        //        if (pRow is not null)
+        //        {
+        //            var cell = pRow.Cells.FirstOrDefault(x => x.ColStart == col);
+        //            if (cell is null)
+        //            {
+        //                pRow.Cells.Add(new ValueCell()
+        //                {
+        //                    NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
+        //                    RowStart = pRow.RowStart,
+        //                    ColStart = col,
+        //                    ParamName = pRow.ParamName,
+        //                    ParamValue = $"{data}",
+        //                });
+        //            }
+        //            else
+        //            {
+        //                if (data is null)
+        //                {
+        //                    pRow.Cells.Remove(cell);
+        //                }
+        //                else
+        //                {
+        //                    cell.ParamValue = $"{data}";
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
         private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
         {
             if (e.Cell is not null)
             {
                 var data = e.Cell.Data;
                 var col = e.Cell.Column;
-                var pRow = Serial.PropRows.FirstOrDefault(x => x.RowStart == e.Cell.Row);
+                var row = e.Cell.Row;
+
+                var pRow = Serial.SolutionChannels.SelectMany(x=>x.SolutionParamList).FirstOrDefault(x => x.RowStart == row);
                 if (pRow is not null)
                 {
-                    var cell = pRow.Cells.FirstOrDefault(x => x.ColStart == col);
+                    var cell = pRow.ParamValues.FirstOrDefault(x => x.ColStart == col);
                     if (cell is null)
                     {
-                        pRow.Cells.Add(new ValueCell()
+                        pRow.ParamValues.Add(new SolutionParamValue()
                         {
                             NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
                             RowStart = pRow.RowStart,
@@ -96,7 +137,7 @@ namespace TestReoGrid
                     {
                         if (data is null)
                         {
-                            pRow.Cells.Remove(cell);
+                            pRow.ParamValues.Remove(cell);
                         }
                         else
                         {
@@ -106,8 +147,6 @@ namespace TestReoGrid
                 }
             }
         }
-
-
 
         /// <summary>
         /// WPF 没有相应的界面
