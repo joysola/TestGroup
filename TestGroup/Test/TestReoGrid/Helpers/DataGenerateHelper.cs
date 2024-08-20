@@ -348,7 +348,6 @@ namespace TestReoGrid.Helpers
                     var propCell = sheet.CreateAndGetCell(propD.RowStart, propD.ColStart);
                     propCell.Data = propD.ParamAlias;
                     propCell.IsReadOnly = true;
-
                     // 1-3. val的范围1格
                     for (int k = 0; k < propD.ParamValues.Count; k++)
                     {

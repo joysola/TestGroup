@@ -68,16 +68,94 @@ namespace TestReoGrid
             Serial = DataGenerateHelper.CreateNamedRanges(Sheet);
             DataGenerateHelper.InitSerial(Serial, Sheet);
 
+
             Sheet.CellDataChanged += Sheet_CellDataChanged;
+            //Sheet.AfterRangeCopy += Sheet_AfterRangeCopy;
+            Sheet.AfterRangeMove += Sheet_AfterRangeMove;
+            //Sheet.AfterCut += Sheet_AfterCut;
+            Sheet.BeforeCopyCellContent += Sheet_BeforeCopyCellContent;
+            Sheet.AfterCopyCellContent += Sheet_AfterCopyCellContent;
+
+            Sheet.AfterCopy += Sheet_AfterCopy;
+            Sheet.BeforeCopy += Sheet_BeforeCopy;
+
+            Sheet.BeforePaste += Sheet_BeforePaste;
             Sheet.AfterPaste += Sheet_AfterPaste;
+
+            Sheet.RangeDataChanged += Sheet_RangeDataChanged;
+            //Sheet.CellEditTextChanging += Sheet_CellEditTextChanging;
             //Sheet.AfterCellEdit += Sheet_AfterCellEdit;
 
+
         }
 
+       
+
+
+
+
+
+        /// <summary>
+        /// 单元格移动后 触发
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Sheet_AfterRangeMove(object sender, unvell.ReoGrid.Events.CopyOrMoveRangeEventArgs e)
+        {
+
+        }
+
+        //private void Sheet_AfterRangeCopy(object sender, unvell.ReoGrid.Events.CopyOrMoveRangeEventArgs e)
+        //{
+
+        //}
+
+        private void Sheet_BeforeCopyCellContent(object sender, unvell.ReoGrid.Events.CopyCellContentEventArgs e)
+        {
+
+        }
+        private void Sheet_AfterCopyCellContent(object sender, unvell.ReoGrid.Events.CopyCellContentEventArgs e)
+        {
+
+        }
+        /// <summary>
+        /// 如果存在readonly 则默认不进行复制
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Sheet_BeforeCopy(object sender, unvell.ReoGrid.Events.BeforeRangeOperationEventArgs e)
+        {
+            Sheet.IterateCells(e.Range, (row, col, cell) =>
+            {
+                if (cell.IsReadOnly)
+                {
+                    e.IsCancelled = true;
+                    return false;
+                }
+                return true;
+            });
+        }
+
+        private void Sheet_AfterCopy(object sender, unvell.ReoGrid.Events.RangeEventArgs e)
+        {
+
+        }
+
+        private void Sheet_BeforePaste(object sender, unvell.ReoGrid.Events.BeforeRangeOperationEventArgs e)
+        {
+
+        }
         private void Sheet_AfterPaste(object sender, unvell.ReoGrid.Events.RangeEventArgs e)
         {
-            
+            //var xx = Sheet.GetPartialGrid(e.Range);
         }
+
+        private void Sheet_RangeDataChanged(object sender, unvell.ReoGrid.Events.RangeEventArgs e)
+        {
+            //var xx = Sheet.GetRangeData(e.Range);
+        }
+
+
 
         private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
         {
