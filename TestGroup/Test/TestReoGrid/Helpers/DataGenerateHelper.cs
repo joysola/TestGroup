@@ -191,41 +191,41 @@ namespace TestReoGrid.Helpers
                     ChannelInfo = ch,
                 };
 
-                var nameSP = new SolutionParam()
-                {
-                    ParamName = nameof(PL_Exp_Dsgn_Inject.Solution_Name),
-                    ParamAlias = "Name",
-                    ParamType = typeof(string),
-                    VarType = VarTypeEnum.Solution,
-                    //ValidationKey = , // 验证校验
-                };
+                var nameSP = CreateSP(nameof(PL_Exp_Dsgn_Inject.Solution_Name));
+                //{
+                //    ParamName = nameof(PL_Exp_Dsgn_Inject.Solution_Name),
+                //    ParamAlias = "Name",
+                //    ParamType = typeof(string),
+                //    VarType = VarTypeEnum.Solution,
+                //    //ValidationKey = , // 验证校验
+                //};
 
-                var ConcSP = new SolutionParam()
-                {
-                    ParamName = nameof(PL_Exp_Dsgn_Inject.Concentration),
-                    ParamAlias = "Conc.",
-                    ParamType = typeof(double),
-                    VarType = VarTypeEnum.Solution,
-                    //ValidationKey = , // 验证校验
-                };
+                var ConcSP = CreateSP(nameof(PL_Exp_Dsgn_Inject.Concentration));
+                //{
+                //    ParamName = nameof(PL_Exp_Dsgn_Inject.Concentration),
+                //    ParamAlias = "Conc.",
+                //    ParamType = typeof(double),
+                //    VarType = VarTypeEnum.Solution,
+                //    //ValidationKey = , // 验证校验
+                //};
 
-                var MWSP = new SolutionParam()
-                {
-                    ParamName = nameof(PL_Exp_Dsgn_Inject.Molecular_Weight),
-                    ParamAlias = "MW",
-                    ParamType = typeof(int),
-                    VarType = VarTypeEnum.Solution,
-                    //ValidationKey = , // 验证校验
-                };
+                var MWSP = CreateSP(nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+                //{
+                //    ParamName = nameof(PL_Exp_Dsgn_Inject.Molecular_Weight),
+                //    ParamAlias = "MW",
+                //    ParamType = typeof(int),
+                //    VarType = VarTypeEnum.Solution,
+                //    //ValidationKey = , // 验证校验
+                //};
 
-                var massConcSP = new SolutionParam()
-                {
-                    ParamName = nameof(PL_Exp_Dsgn_Inject.Mass_concentration),
-                    ParamAlias = "Mass Conc.",
-                    ParamType = typeof(double),
-                    VarType = VarTypeEnum.Solution,
-                    //ValidationKey = , // 验证校验
-                };
+                var massConcSP = CreateSP(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                //{
+                //    ParamName = nameof(PL_Exp_Dsgn_Inject.Mass_concentration),
+                //    ParamAlias = "Mass Conc.",
+                //    ParamType = typeof(double),
+                //    VarType = VarTypeEnum.Solution,
+                //    //ValidationKey = , // 验证校验
+                //};
 
                 serialSoluCh.SolutionParamList = [nameSP, ConcSP, MWSP, massConcSP];
 
@@ -234,7 +234,59 @@ namespace TestReoGrid.Helpers
             return result;
         }
 
-       
+        public static SolutionParam CreateSP(string key)
+        {
+            SolutionParam sp = null;
+            switch (key)
+            {
+                case nameof(PL_Exp_Dsgn_Inject.Solution_Name):
+                    sp = new SolutionParam
+                    {
+                        ParamName = key,
+                        ParamAlias = "Name",
+                        ParamType = typeof(string),
+                        VarType = VarTypeEnum.Solution,
+                    };
+                    break;
+                case nameof(PL_Exp_Dsgn_Inject.Concentration):
+                    sp = new SolutionParam
+                    {
+                        ParamName = key,
+                        ParamAlias = "Conc.",
+                        ParamType = typeof(double),
+                        VarType = VarTypeEnum.Solution,
+                    };
+                    break;
+                case nameof(PL_Exp_Dsgn_Inject.Molecular_Weight):
+                    sp = new SolutionParam
+                    {
+                        ParamName = key,
+                        ParamAlias = "MW",
+                        ParamType = typeof(int),
+                        VarType = VarTypeEnum.Solution,
+                    };
+                    break;
+                case nameof(PL_Exp_Dsgn_Inject.Mass_concentration):
+                    sp = new SolutionParam
+                    {
+                        ParamName = key,
+                        ParamAlias = "Mass Conc.",
+                        ParamType = typeof(double),
+                        VarType = VarTypeEnum.Solution,
+                    };
+                    break;
+                case nameof(PL_Exp_Dsgn_Inject.Info):
+                    sp = new SolutionParam
+                    {
+                        ParamName = key,
+                        ParamAlias = "Info.",
+                        ParamType = typeof(string),
+                        VarType = VarTypeEnum.Solution,
+                    };
+                    break;
+            }
+            return sp;
+        }
 
         private static List<SerialSolutionChannel> CreateSerialDatas(int rowCount, int colCount)
         {
@@ -282,7 +334,7 @@ namespace TestReoGrid.Helpers
             return rawDatas;
         }
 
-     
+
 
         private static SerialRange CreateSerialNamedRanges(IList<SerialSolutionChannel> solutionChannels, Worksheet sheet)
         {

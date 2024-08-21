@@ -8,6 +8,7 @@
         xmlns:reoGrid="clr-namespace:unvell.ReoGrid;assembly=unvell.ReoGrid"
         xmlns:local="clr-namespace:TestReoGrid"
         xmlns:vm="clr-namespace:TestReoGrid"
+        WindowStartupLocation="CenterScreen"
         d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
         mc:Ignorable="d"
         Title="MainWindow"
@@ -23,17 +24,30 @@
             <Button Style="{StaticResource ButtonDashedPrimary.Small}"
                     Command="{Binding SetFilterCommand}"
                     Content="Test" />
+            <!--SelectedItem="{Binding SelectedFilterCol}"-->
             <hc:ComboBox Style="{StaticResource ComboBoxPlus.Small}"
                          hc:InfoElement.ShowClearButton="True"
-                         ItemsSource="{Binding FilterColumns}"
+                         ItemsSource="{Binding FilterDict}"
+                         SelectedValuePath="Key"
+                         DisplayMemberPath="Value"
                          d:ItemsSource="{d:SampleData ItemCount=6}"
-                         SelectedItem="{Binding SelectedFilterCol}"
+                         SelectedValue="{Binding SelectedFilterCol}"
                          MinWidth="100"
                          Margin="20,0,0,0" />
             <Button Style="{StaticResource ButtonDashedPrimary.Small}"
                     Margin="20,0,0,0"
                     Command="{Binding GetSerialDataCommand}"
                     Content="GetSerialData" />
+
+            <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                    Margin="20,0,0,0"
+                    Command="{Binding DeletePropCommand}"
+                    Content="DeleteProp" />
+
+            <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                    Margin="20,0,0,0"
+                    Command="{Binding AddPropCommand}"
+                    Content="AddProp" />
         </StackPanel>
 
         <reoGrid:ReoGridControl Grid.Row="99"

@@ -13,5 +13,7 @@ namespace TestReoGrid.Models.Enums
         Cut,
         Move,
         Delete,
+        InsertRow,
+        DeleteRow,
     }
 }

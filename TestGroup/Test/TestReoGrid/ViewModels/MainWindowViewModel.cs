@@ -31,8 +31,19 @@ namespace TestReoGrid
         [ObservableProperty]
         private AutoColumnFilter _propFilter;
 
+        //[ObservableProperty]
+        //private ObservableCollection<string> _filterColumns = ["Conc.", "Mass Conc.", "Name", "Info", "MW"];
+
+
         [ObservableProperty]
-        private ObservableCollection<string> _filterColumns = ["Conc.", "Mass Conc.", "Name", "Info", "MW"];
+        private Dictionary<string, string> _filterDict = new()
+        {
+            [nameof(PL_Exp_Dsgn_Inject.Solution_Name)] = "Name",
+            [nameof(PL_Exp_Dsgn_Inject.Concentration)] = "Conc.",
+            [nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)] = "MW",
+            [nameof(PL_Exp_Dsgn_Inject.Info)] = "Info",
+            [nameof(PL_Exp_Dsgn_Inject.Mass_concentration)] = "Mass Conc.",
+        };
 
         [ObservableProperty]
         private string _selectedFilterCol;
@@ -89,13 +100,154 @@ namespace TestReoGrid
 
 
             Sheet.RangeDataChanged += Sheet_RangeDataChanged;
-
             Sheet.BeforeDeleteCellContent += Sheet_BeforeDeleteCellContent;
+
+            //Sheet.RowsDeleted += Sheet_RowsDeleted;
+        }
+
+
+        /// <summary>
+        /// WPF 没有相应的界面
+        /// </summary>
+        [RelayCommand]
+        private void SetFilter()
+        {
+            PropFilter?.Detach();
+            PropFilter = Sheet.CreateColumnFilter("B", "B", 0, unvell.ReoGrid.Data.AutoColumnFilterUI.NoGUI);
+            var selectedItems = PropFilter.Columns["B"].SelectedTextItems;
+            selectedItems.Clear();
+            if (SelectedFilterCol is { Length: > 0 })
+            {
+                selectedItems.AddRange([FilterDict[SelectedFilterCol]]);
+            }
+            else
+            {
+                selectedItems.AddRange(FilterDict.Values);
+            }
+            PropFilter.Apply();
+        }
+
+
+        [RelayCommand]
+        private void GetSerialData()
+        {
+            // 结束编辑
+            Sheet.EndEdit(EndEditReason.NormalFinish);
+            var xx = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues).ToList();
+            //DataGenerateHelper.GetSerialData(Serial, Sheet);
+        }
+
+
+        [RelayCommand]
+        private void DeleteProp()
+        {
+            if (SelectedFilterCol is { Length: > 0 })
+            {
+                _operStatus = OperEnum.DeleteRow;
+                var allSPs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
+                foreach (var ch in Serial.SolutionChannels)
+                {
+                    var sp = ch.SolutionParamList.FirstOrDefault(x => x.ParamName == SelectedFilterCol);
+                    ch.SolutionParamList.Remove(sp);
+                    allSPs.Remove(sp);
+
+                    Sheet.DeleteRows(sp.RowStart, 1);
+
+                    var row = sp.RowStart;
+                    // 更新sp
+                    var lowRows = allSPs.Where(x => x.RowStart > row).ToList();
+                    foreach (var lrow in lowRows)
+                    {
+                        lrow.RowStart--;
+                        lrow.RowEnd--;
+                        foreach (var val in lrow.ParamValues)
+                        {
+                            val.RowStart--;
+                            val.RowEnd--;
+                        }
+                    }
+                    // 更新ch
+                    ch.RowEnd--;
+                    var lowChs = Serial.SolutionChannels.Where(x => x.RowStart > row).ToList();
+                    foreach (var lch in lowChs)
+                    {
+                        lch.RowStart--;
+                        lch.RowEnd--;
+                    }
+                }
+                _operStatus = OperEnum.None;
+            }
+        }
+
+
+        [RelayCommand]
+        private void AddProp()
+        {
+            if (SelectedFilterCol is { Length: > 0 })
+            {
+                _operStatus = OperEnum.InsertRow;
+                var sp = DataGenerateHelper.CreateSP(SelectedFilterCol);
+                var allSPs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
+                foreach (var ch in Serial.SolutionChannels)
+                {
+                    var existeSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName == SelectedFilterCol);
+                    if (existeSP is null)
+                    {
+                        var row = ch.RowEnd + 1;
+                        sp.RowStart = row;
+                        sp.RowEnd = row;
+
+                        sp.ColStart = ch.ColStart + 1;
+                        sp.ColEnd = sp.ColStart;
+
+                        ch.SolutionParamList.Add(sp);
+                        Sheet.InsertRows(row, 1);
+
+                        var propCell = Sheet.CreateAndGetCell(sp.RowStart, sp.ColStart);
+                        propCell.Data = sp.ParamAlias;
+                        propCell.IsReadOnly = true;
+
+
+                        var lowSPs = allSPs.Where(x => x.RowStart >= row).ToList();
+                        foreach (var lrow in lowSPs)
+                        {
+                            lrow.RowStart++;
+                            lrow.RowEnd++;
+                            foreach (var val in lrow.ParamValues)
+                            {
+                                val.RowStart++;
+                                val.RowEnd++;
+                            }
+                        }
+                        allSPs.Add(sp);
+
+                        ch.RowEnd++;
+                        var lowChs = Serial.SolutionChannels.Where(x => x.RowStart >= row).ToList();
+                        foreach (var lch in lowChs)
+                        {
+                            lch.RowStart++;
+                            lch.RowEnd++;
+                        }
+
+                        // 更新channel
+                        Sheet.UndefineNamedRange(ch.NameKey);
+                        var newRange = Sheet.DefineNamedRange(ch.NameKey, ch.RowStart, ch.ColStart, ch.Rows, ch.Cols);
+                        newRange.Merge();
+                        newRange.IsReadonly = true;
+                    }
+                }
+
+                _operStatus = OperEnum.None;
+            }
         }
 
 
 
+        #endregion Commands
 
+
+
+        #region Operation
 
         #region Move
         private void Sheet_BeforeRangeMove(object sender, unvell.ReoGrid.Events.BeforeCopyOrMoveRangeEventArgs e)
@@ -130,7 +282,7 @@ namespace TestReoGrid
                         var sp = Serial.SolutionChannels.FindSoluParam(row, col);
                         var spv = sp.FindSoluParamValue(row, col);
                         sp?.ParamValues?.Remove(spv);
-                    
+
                         spv = new SolutionParamValue
                         {
                             RowStart = row,
@@ -229,6 +381,8 @@ namespace TestReoGrid
         }
 
 
+
+        #endregion Copy Paste
         private void Sheet_RangeDataChanged(object sender, unvell.ReoGrid.Events.RangeEventArgs e)
         {
             switch (_operStatus)
@@ -237,7 +391,7 @@ namespace TestReoGrid
                     Sheet.IterateCells(e.Range, (row, col, cell) =>
                     {
                         Serial.SolutionChannels.RemoveSoluParamValue(row, col);
-                       
+
                         return true;
                     });
                     break;
@@ -246,7 +400,7 @@ namespace TestReoGrid
                     Sheet.IterateCells(e.Range, (row, col, cell) =>
                     {
                         Serial.SolutionChannels.RemoveSoluParamValue(row, col);
-                      
+
                         return true;
                     });
                     _operStatus = OperEnum.None;
@@ -266,8 +420,6 @@ namespace TestReoGrid
                 _operStatus = OperEnum.Delete;
             }
         }
-        
-        #endregion Copy Paste
 
 
         private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
@@ -312,40 +464,7 @@ namespace TestReoGrid
             }
         }
 
-        /// <summary>
-        /// WPF 没有相应的界面
-        /// </summary>
-        [RelayCommand]
-        private void SetFilter()
-        {
-            PropFilter?.Detach();
-            PropFilter = Sheet.CreateColumnFilter("B", "B", 0, unvell.ReoGrid.Data.AutoColumnFilterUI.NoGUI);
-            var selectedItems = PropFilter.Columns["B"].SelectedTextItems;
-            selectedItems.Clear();
-            if (SelectedFilterCol is { Length: > 0 })
-            {
-                selectedItems.AddRange([SelectedFilterCol]);
-            }
-            else
-            {
-                selectedItems.AddRange(FilterColumns);
-            }
-            PropFilter.Apply();
-        }
-
-
-        [RelayCommand]
-        private void GetSerialData()
-        {
-            // 结束编辑
-            Sheet.EndEdit(EndEditReason.NormalFinish);
-            var xx = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues).ToList();
-            //DataGenerateHelper.GetSerialData(Serial, Sheet);
-        }
-
-
-        #endregion Commands
-
+        #endregion Operation
 
 
         #region Init Reogrid
