@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using TestReoGrid.Helpers;
 using TestReoGrid.Models;
+using TestReoGrid.Models.Enums;
 using TestReoGrid.Models.ReoGrid.Old;
 using unvell.ReoGrid;
 using unvell.ReoGrid.Data;
@@ -70,11 +71,15 @@ namespace TestReoGrid
 
 
             Sheet.CellDataChanged += Sheet_CellDataChanged;
+
+
             //Sheet.AfterRangeCopy += Sheet_AfterRangeCopy;
-            Sheet.AfterRangeMove += Sheet_AfterRangeMove;
             //Sheet.AfterCut += Sheet_AfterCut;
-            Sheet.BeforeCopyCellContent += Sheet_BeforeCopyCellContent;
-            Sheet.AfterCopyCellContent += Sheet_AfterCopyCellContent;
+            //Sheet.BeforeCopyCellContent += Sheet_BeforeCopyCellContent;
+            //Sheet.AfterCopyCellContent += Sheet_AfterCopyCellContent;
+
+            Sheet.BeforeRangeMove += Sheet_BeforeRangeMove;
+            Sheet.AfterRangeMove += Sheet_AfterRangeMove;
 
             Sheet.AfterCopy += Sheet_AfterCopy;
             Sheet.BeforeCopy += Sheet_BeforeCopy;
@@ -82,19 +87,44 @@ namespace TestReoGrid
             Sheet.BeforePaste += Sheet_BeforePaste;
             Sheet.AfterPaste += Sheet_AfterPaste;
 
+
             Sheet.RangeDataChanged += Sheet_RangeDataChanged;
-            //Sheet.CellEditTextChanging += Sheet_CellEditTextChanging;
-            //Sheet.AfterCellEdit += Sheet_AfterCellEdit;
 
-
+            Sheet.BeforeDeleteCellContent += Sheet_BeforeDeleteCellContent;
         }
 
-       
+        private OperEnum _operStatus;
 
 
+        //private void Sheet_BeforeCopyCellContent(object sender, unvell.ReoGrid.Events.CopyCellContentEventArgs e)
+        //{
+
+        //}
+        //private void Sheet_AfterCopyCellContent(object sender, unvell.ReoGrid.Events.CopyCellContentEventArgs e)
+        //{
+
+        //}
 
 
+        private void Sheet_BeforeDeleteCellContent(object sender, unvell.ReoGrid.Events.DeleteCellContentEventArgs e)
+        {
+            if (_operStatus is OperEnum.None && !e.Cell.IsReadOnly)
+            {
+                _operStatus = OperEnum.Delete;
+            }
+        }
 
+        private List<SolutionParamValue> _sourceValues = [];
+        private List<SolutionParamValue> _destinationValues = [];
+
+        #region Move
+        private void Sheet_BeforeRangeMove(object sender, unvell.ReoGrid.Events.BeforeCopyOrMoveRangeEventArgs e)
+        {
+            if (_operStatus is OperEnum.None)
+            {
+                _operStatus = OperEnum.Move;
+            }
+        }
         /// <summary>
         /// 单元格移动后 触发
         /// </summary>
@@ -102,22 +132,14 @@ namespace TestReoGrid
         /// <param name="e"></param>
         private void Sheet_AfterRangeMove(object sender, unvell.ReoGrid.Events.CopyOrMoveRangeEventArgs e)
         {
-
+            if (_operStatus is OperEnum.Move)
+            {
+                _operStatus = OperEnum.None;
+            }
         }
+        #endregion Move
 
-        //private void Sheet_AfterRangeCopy(object sender, unvell.ReoGrid.Events.CopyOrMoveRangeEventArgs e)
-        //{
-
-        //}
-
-        private void Sheet_BeforeCopyCellContent(object sender, unvell.ReoGrid.Events.CopyCellContentEventArgs e)
-        {
-
-        }
-        private void Sheet_AfterCopyCellContent(object sender, unvell.ReoGrid.Events.CopyCellContentEventArgs e)
-        {
-
-        }
+        #region Copy Paste
         /// <summary>
         /// 如果存在readonly 则默认不进行复制
         /// </summary>
@@ -134,32 +156,97 @@ namespace TestReoGrid
                 }
                 return true;
             });
+
+            if (!e.IsCancelled)
+            {
+                _sourceValues.Clear();
+                _operStatus = OperEnum.Copy;
+            }
         }
 
         private void Sheet_AfterCopy(object sender, unvell.ReoGrid.Events.RangeEventArgs e)
         {
-
+            switch (_operStatus)
+            {
+                case OperEnum.Copy:
+                case OperEnum.Cut:
+                    Sheet.IterateCells(e.Range, (row, col, cell) =>
+                    {
+                        var spv = new SolutionParamValue
+                        {
+                            RowStart = row,
+                            RowEnd = row,
+                            ColStart = col,
+                            ColEnd = col,
+                            ParamValue = $"{cell.Data}",
+                        };
+                        _sourceValues.Add(spv);
+                        return true;
+                    });
+                    break;
+            }
         }
 
         private void Sheet_BeforePaste(object sender, unvell.ReoGrid.Events.BeforeRangeOperationEventArgs e)
         {
-
+            _destinationValues.Clear();
+            // 可以拿到 目标位置的range
+            switch (_operStatus)
+            {
+                case OperEnum.Copy:
+                    Sheet.IterateCells(e.Range, false, (row, col, cell) =>
+                    {
+                        var spv = new SolutionParamValue
+                        {
+                            RowStart = row,
+                            RowEnd = row,
+                            ColStart = col,
+                            ColEnd = col,
+                            ParamValue = null,
+                        };
+                        _destinationValues.Add(spv);
+                        return true;
+                    });
+                    break;
+                case OperEnum.Cut:
+                    break;
+            }
         }
+
         private void Sheet_AfterPaste(object sender, unvell.ReoGrid.Events.RangeEventArgs e)
         {
-            //var xx = Sheet.GetPartialGrid(e.Range);
+            for (int i = 0; i < _sourceValues.Count; i++)
+            {
+                var source = _sourceValues[i];
+                var destination = _destinationValues[i];
+                destination.ParamValue = source.ParamValue;
+            }
+            // 没啥用
+            _operStatus = OperEnum.None;
         }
+
 
         private void Sheet_RangeDataChanged(object sender, unvell.ReoGrid.Events.RangeEventArgs e)
         {
-            //var xx = Sheet.GetRangeData(e.Range);
-        }
+            switch (_operStatus)
+            {
 
+                case OperEnum.Copy:
+                    _operStatus = OperEnum.Cut;
+                    break;
+
+                case OperEnum.Delete:
+                    _operStatus = OperEnum.None;
+                    break;
+
+            }
+        }
+        #endregion Copy Paste
 
 
         private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
         {
-            if (e.Cell is not null)
+            if (e.Cell is not null && _operStatus is OperEnum.None)
             {
                 var data = e.Cell.Data;
                 var col = e.Cell.Column;
@@ -196,16 +283,6 @@ namespace TestReoGrid
                 }
             }
         }
-        //private void Sheet_CellEditCharInputed(object sender, unvell.ReoGrid.Events.CellEditCharInputEventArgs e)
-        //{
-        //    Sheet_CellDataChanged(null, e);
-        //}
-
-        //private void Sheet_AfterCellEdit(object sender, unvell.ReoGrid.Events.CellAfterEditEventArgs e)
-        //{
-        //    Sheet_CellDataChanged(null, e);
-        //}
-
 
         //private void Sheet_CellDataChanged(object sender, unvell.ReoGrid.Events.CellEventArgs e)
         //{
