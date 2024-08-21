@@ -69,6 +69,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestReoGrid", "Test\TestReo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBackupMysql", "Test\TestBackupMysql\TestBackupMysql.csproj", "{7882A27C-70C8-45D3-90E4-995CB5978A79}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReoGrid.Mvvm", "Test\ReoGrid.Mvvm\ReoGrid.Mvvm.csproj", "{91C22DCE-7D14-4E7D-85FC-612FAA07D2AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -159,6 +161,10 @@ Global
 		{7882A27C-70C8-45D3-90E4-995CB5978A79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7882A27C-70C8-45D3-90E4-995CB5978A79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7882A27C-70C8-45D3-90E4-995CB5978A79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91C22DCE-7D14-4E7D-85FC-612FAA07D2AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91C22DCE-7D14-4E7D-85FC-612FAA07D2AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91C22DCE-7D14-4E7D-85FC-612FAA07D2AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91C22DCE-7D14-4E7D-85FC-612FAA07D2AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -195,6 +201,7 @@ Global
 		{35A04BAD-2906-493B-8B7A-7D1F4C80ACD6} = {0D9B0C10-F680-491D-B768-1B3E78A9DB2C}
 		{E5D06655-FAE6-4906-B738-4A766E2CB1B5} = {0D9B0C10-F680-491D-B768-1B3E78A9DB2C}
 		{7882A27C-70C8-45D3-90E4-995CB5978A79} = {0D9B0C10-F680-491D-B768-1B3E78A9DB2C}
+		{91C22DCE-7D14-4E7D-85FC-612FAA07D2AC} = {0D9B0C10-F680-491D-B768-1B3E78A9DB2C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5F15127E-7428-4DC2-8B59-98F422C0234E}
