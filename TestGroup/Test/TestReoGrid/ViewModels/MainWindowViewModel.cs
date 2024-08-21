@@ -127,23 +127,28 @@ namespace TestReoGrid
             PropFilter.Apply();
         }
 
-
+        /// <summary>
+        /// 测试
+        /// </summary>
         [RelayCommand]
         private void GetSerialData()
         {
             // 结束编辑
             Sheet.EndEdit(EndEditReason.NormalFinish);
-            var xx = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues).ToList();
+            var xx = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
+            var yy = xx.SelectMany(x => x.ParamValues).ToList();
             //DataGenerateHelper.GetSerialData(Serial, Sheet);
         }
 
-
+        /// <summary>
+        /// 删除某个属性
+        /// </summary>
         [RelayCommand]
         private void DeleteProp()
         {
+            _operStatus = OperEnum.DeleteRow;
             if (SelectedFilterCol is { Length: > 0 })
             {
-                _operStatus = OperEnum.DeleteRow;
                 var allSPs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
                 foreach (var ch in Serial.SolutionChannels)
                 {
@@ -175,21 +180,23 @@ namespace TestReoGrid
                         lch.RowEnd--;
                     }
                 }
-                _operStatus = OperEnum.None;
             }
+            _operStatus = OperEnum.None;
         }
 
-
+        /// <summary>
+        /// 新增某个属性
+        /// </summary>
         [RelayCommand]
         private void AddProp()
         {
+            _operStatus = OperEnum.InsertRow;
             if (SelectedFilterCol is { Length: > 0 })
             {
-                _operStatus = OperEnum.InsertRow;
-                var sp = DataGenerateHelper.CreateSP(SelectedFilterCol);
                 var allSPs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
                 foreach (var ch in Serial.SolutionChannels)
                 {
+                    var sp = DataGenerateHelper.CreateSP(SelectedFilterCol); // 必须重新生成一个
                     var existeSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName == SelectedFilterCol);
                     if (existeSP is null)
                     {
@@ -229,16 +236,15 @@ namespace TestReoGrid
                             lch.RowEnd++;
                         }
 
-                        // 更新channel
+                        // 更新channel range
                         Sheet.UndefineNamedRange(ch.NameKey);
                         var newRange = Sheet.DefineNamedRange(ch.NameKey, ch.RowStart, ch.ColStart, ch.Rows, ch.Cols);
                         newRange.Merge();
                         newRange.IsReadonly = true;
                     }
                 }
-
-                _operStatus = OperEnum.None;
             }
+            _operStatus = OperEnum.None;
         }
 
 
