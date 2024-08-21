@@ -189,6 +189,7 @@ namespace TestReoGrid
 
         private void Sheet_BeforePaste(object sender, unvell.ReoGrid.Events.BeforeRangeOperationEventArgs e)
         {
+            Sheet.SelectRange(e.Range); // 重点，否则after就没有这个区域了
             _destinationValues.Clear();
             // 可以拿到 目标位置的range
             switch (_operStatus)
