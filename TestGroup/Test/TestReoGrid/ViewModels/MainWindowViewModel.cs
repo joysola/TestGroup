@@ -51,6 +51,7 @@ namespace TestReoGrid
 
 
         private OperEnum _operStatus;
+
         #region Commands
         /// <summary>
         /// Load
@@ -67,18 +68,15 @@ namespace TestReoGrid
             // CreateRanges();
             Data();
 
-            //
             Serial = DataGenerateHelper.CreateNamedRanges(Sheet);
             DataGenerateHelper.InitSerial(Serial, Sheet);
-
-
-            Sheet.CellDataChanged += Sheet_CellDataChanged;
-
 
             //Sheet.AfterRangeCopy += Sheet_AfterRangeCopy;
             //Sheet.AfterCut += Sheet_AfterCut;
             //Sheet.BeforeCopyCellContent += Sheet_BeforeCopyCellContent;
             //Sheet.AfterCopyCellContent += Sheet_AfterCopyCellContent;
+
+            Sheet.CellDataChanged += Sheet_CellDataChanged;
 
             Sheet.BeforeRangeMove += Sheet_BeforeRangeMove;
             Sheet.AfterRangeMove += Sheet_AfterRangeMove;
@@ -96,13 +94,7 @@ namespace TestReoGrid
         }
 
 
-        private void Sheet_BeforeDeleteCellContent(object sender, unvell.ReoGrid.Events.DeleteCellContentEventArgs e)
-        {
-            if (_operStatus is OperEnum.None && !e.Cell.IsReadOnly)
-            {
-                _operStatus = OperEnum.Delete;
-            }
-        }
+
 
 
         #region Move
@@ -122,33 +114,23 @@ namespace TestReoGrid
         {
             if (_operStatus is OperEnum.Move)
             {
+                // from
                 Sheet.IterateCells(e.FromRange, (row, col, cell) =>
                 {
-                    var soluCh = Serial.SolutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
-                    if (soluCh is not null)
-                    {
-                        var sp = soluCh.SolutionParamList.FirstOrDefault(x => x.RowStart == row);
-                        var spv = sp.ParamValues.FirstOrDefault(x => x.RowStart == row && x.ColStart == col);
-                        if (spv is not null)
-                        {
-                            sp.ParamValues.Remove(spv);
-                        }
-                    }
+                    Serial.SolutionChannels.RemoveSoluParamValue(row, col);
                     return true;
                 });
 
-
+                // to
                 Sheet.IterateCells(e.ToRange, (row, col, cell) =>
                 {
                     var soluCh = Serial.SolutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
                     if (soluCh is not null)
                     {
-                        var sp = soluCh.SolutionParamList.FirstOrDefault(x => x.RowStart == row);
-                        var spv = sp.ParamValues.FirstOrDefault(x => x.RowStart == row && x.ColStart == col);
-                        if (spv is not null)
-                        {
-                            sp.ParamValues.Remove(spv);
-                        }
+                        var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                        var spv = sp.FindSoluParamValue(row, col);
+                        sp?.ParamValues?.Remove(spv);
+                    
                         spv = new SolutionParamValue
                         {
                             RowStart = row,
@@ -228,23 +210,18 @@ namespace TestReoGrid
                     ColEnd = col,
                     ParamValue = $"{cell.Data}",
                 };
+                var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                var oldSpv = sp.FindSoluParamValue(row, col);
+                sp?.ParamValues?.Remove(oldSpv); // 目标位置已经有值，则先删除
 
-
-                var soluCh = Serial.SolutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
-                if (soluCh is not null)
+                if (sp is not null)
                 {
-                    var sp = soluCh.SolutionParamList.FirstOrDefault(x => x.RowStart == row);
-                    var oldSPV = sp.ParamValues.FirstOrDefault(x => x.RowStart == row && x.ColStart == col);
-                    if (oldSPV is not null)
-                    {
-                        sp.ParamValues.Remove(oldSPV);
-                    }
                     spv.ParamName = sp.ParamName;
                     sp.ParamValues.Add(spv);
                 }
+
                 return true;
             });
-
 
 
             // 没啥用
@@ -259,13 +236,8 @@ namespace TestReoGrid
                 case OperEnum.Copy:
                     Sheet.IterateCells(e.Range, (row, col, cell) =>
                     {
-                        var soluCh = Serial.SolutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
-                        if (soluCh is not null)
-                        {
-                            var sp = soluCh.SolutionParamList.FirstOrDefault(x => x.RowStart == row);
-                            var spv = sp.ParamValues.FirstOrDefault(x => x.RowStart == row && x.ColStart == col);
-                            sp.ParamValues.Remove(spv);
-                        }
+                        Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                       
                         return true;
                     });
                     break;
@@ -273,19 +245,28 @@ namespace TestReoGrid
                 case OperEnum.Delete:
                     Sheet.IterateCells(e.Range, (row, col, cell) =>
                     {
-                        var soluCh = Serial.SolutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
-                        if (soluCh is not null)
-                        {
-                            var sp = soluCh.SolutionParamList.FirstOrDefault(x => x.RowStart == row);
-                            var spv = sp.ParamValues.FirstOrDefault(x => x.RowStart == row && x.ColStart == col);
-                            sp.ParamValues.Remove(spv);
-                        }
+                        Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                      
                         return true;
                     });
                     _operStatus = OperEnum.None;
                     break;
             }
         }
+
+        /// <summary>
+        /// 删除单元格操作先进入此方法
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Sheet_BeforeDeleteCellContent(object sender, unvell.ReoGrid.Events.DeleteCellContentEventArgs e)
+        {
+            if (_operStatus is OperEnum.None && !e.Cell.IsReadOnly)
+            {
+                _operStatus = OperEnum.Delete;
+            }
+        }
+        
         #endregion Copy Paste
 
 
@@ -297,20 +278,22 @@ namespace TestReoGrid
                 var col = e.Cell.Column;
                 var row = e.Cell.Row;
 
-                var pRow = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).FirstOrDefault(x => x.RowStart == row);
-                if (pRow is not null)
+                var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                //var pRow = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).FirstOrDefault(x => x.RowStart == row);
+                if (sp is not null)
                 {
-                    var cell = pRow.ParamValues.FirstOrDefault(x => x.ColStart == col);
-                    if (cell is null)
+                    //var cell = pRow.ParamValues.FirstOrDefault(x => x.ColStart == col);
+                    var spv = sp.FindSoluParamValue(row, col);
+                    if (spv is null)
                     {
-                        pRow.ParamValues.Add(new SolutionParamValue()
+                        sp.ParamValues.Add(new SolutionParamValue()
                         {
                             //NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
-                            RowStart = pRow.RowStart,
-                            RowEnd = pRow.RowStart,
+                            RowStart = sp.RowStart,
+                            RowEnd = sp.RowStart,
                             ColStart = col,
                             ColEnd = col,
-                            ParamName = pRow.ParamName,
+                            ParamName = sp.ParamName,
                             ParamValue = $"{data}",
                         });
                     }
@@ -318,11 +301,11 @@ namespace TestReoGrid
                     {
                         if (data is null)
                         {
-                            pRow.ParamValues.Remove(cell);
+                            sp.ParamValues.Remove(spv);
                         }
                         else
                         {
-                            cell.ParamValue = $"{data}";
+                            spv.ParamValue = $"{data}";
                         }
                     }
                 }
@@ -363,6 +346,9 @@ namespace TestReoGrid
 
         #endregion Commands
 
+
+
+        #region Init Reogrid
         private void InitSetting(ReoGridControl reoGrid)
         {
             reoGrid.SheetTabNewButtonVisible = false;
@@ -431,7 +417,7 @@ namespace TestReoGrid
             PropRange.Data = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" }; ;
         }
 
-
+        #endregion Init Reogrid
 
     }
 }
