@@ -2,6 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:TestReoGrid"
+             xmlns:plf ="clr-namespace:TestReoGrid.ValidationRules"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -9,6 +11,36 @@
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <Color x:Key="PL_DangerColor">#EA0000</Color>
+            <SolidColorBrush x:Key="PL_DangerBrush"
+                             Color="{StaticResource PL_DangerColor}" />
+            
+
+            <hc:NoBlankTextRule x:Key="Name"
+                                ValidatesOnTargetUpdated="True" />
+            
+            <hc:NoBlankTextRule x:Key="Info"
+                                ValidatesOnTargetUpdated="True" />
+            
+            <plf:NumericUpDownRule x:Key="MW"
+                                   CanbeNull="True"
+                                   HasDecimal="False"
+                                   MinValue="0"
+                                   MaxValue="9999999"
+                                   ValidatesOnTargetUpdated="True" />
+            
+            <plf:NumericUpDownRule x:Key="Conc"
+                                   CanbeNull="True"
+                                   MinValue="0"
+                                   MaxValue="99999"
+                                   ValidatesOnTargetUpdated="True" />
+            
+            <plf:NumericUpDownRule x:Key="MassConc"
+                                   CanbeNull="True"
+                                   MinValue="0"
+                                   MaxValue="99999"
+                                   ValidatesOnTargetUpdated="True" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

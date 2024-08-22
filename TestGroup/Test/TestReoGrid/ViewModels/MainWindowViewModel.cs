@@ -7,13 +7,16 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using TestReoGrid.Helpers;
 using TestReoGrid.Models;
 using TestReoGrid.Models.Enums;
 using TestReoGrid.Models.ReoGrid.Old;
 using unvell.ReoGrid;
 using unvell.ReoGrid.Data;
+using unvell.ReoGrid.Graphics;
 
 namespace TestReoGrid
 {
@@ -21,7 +24,11 @@ namespace TestReoGrid
     {
         private const string Channels = "Channels";
         private const string Props = "Props";
-
+        private RangeBorderStyle _dangerRangeBdStyle = new()
+        {
+            Color = ((Brush)Application.Current.Resources["PL_DangerBrush"]).ToReoColor(),
+            Style = BorderLineStyle.Solid
+        };
         [ObservableProperty]
         private ReoGridControl _reoGrid;
 
@@ -77,7 +84,7 @@ namespace TestReoGrid
             //RowCol();
             Freeze();
             // CreateRanges();
-            Data();
+            //Data();
 
             Serial = DataGenerateHelper.CreateNamedRanges(Sheet);
             DataGenerateHelper.InitSerial(Serial, Sheet);
@@ -389,6 +396,7 @@ namespace TestReoGrid
 
 
         #endregion Copy Paste
+
         private void Sheet_RangeDataChanged(object sender, unvell.ReoGrid.Events.RangeEventArgs e)
         {
             switch (_operStatus)
@@ -436,6 +444,7 @@ namespace TestReoGrid
                 var col = e.Cell.Column;
                 var row = e.Cell.Row;
 
+
                 var sp = Serial.SolutionChannels.FindSoluParam(row, col);
                 //var pRow = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).FirstOrDefault(x => x.RowStart == row);
                 if (sp is not null)
@@ -472,6 +481,40 @@ namespace TestReoGrid
 
         #endregion Operation
 
+        #region Style
+        public void SetDangerStyle(Cell cell)
+        {
+            if (cell is not null)
+            {
+                cell.Border.All = new RangeBorderStyle()
+                {
+                    Color = ((Brush)Application.Current.Resources["PL_DangerBrush"]).ToReoColor(),
+                    Style = BorderLineStyle.Solid,
+                };
+            }
+        }
+        public void RestoreStyle(Cell cell)
+        {
+            if (cell is not null)
+            {
+                cell.Border.All = RangeBorderStyle.Empty;
+            }
+        }
+
+       
+
+        public void SetDangerBorder(int row, int col, int rows, int cols)
+        {
+            Sheet.SetRangeBorders(row, col, rows, cols, BorderPositions.InsideAll, _dangerRangeBdStyle);
+        }
+
+        public void RestoreBorder(int row, int col, int rows, int cols)
+        {
+            Sheet.RemoveRangeBorders(new RangePosition(row, col, rows, cols), BorderPositions.InsideAll);
+        }
+
+
+        #endregion Style
 
         #region Init Reogrid
         private void InitSetting(ReoGridControl reoGrid)
@@ -509,38 +552,38 @@ namespace TestReoGrid
         }
 
 
-        private void Data()
-        {
-            //var channels = new List<string>();
-            //for (int i = 0; i < 8; i++)
-            //{
-            //    channels.Add($"Channel{i + 1}");
-            //}
-            //Sheet["A1:A8"] = channels;
-            //Sheet["B1:B8"] = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" };
-        }
+        //private void Data()
+        //{
+        //var channels = new List<string>();
+        //for (int i = 0; i < 8; i++)
+        //{
+        //    channels.Add($"Channel{i + 1}");
+        //}
+        //Sheet["A1:A8"] = channels;
+        //Sheet["B1:B8"] = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" };
+        //}
 
 
 
-        private void CreateRanges()
-        {
-            ChannelsRange = Sheet.DefineNamedRange(Channels, "A1:A8");
-            ChannelsRange.IsReadonly = true;
-            ChannelsRange.Comment = "123";
+        //private void CreateRanges()
+        //{
+        //    ChannelsRange = Sheet.DefineNamedRange(Channels, "A1:A8");
+        //    ChannelsRange.IsReadonly = true;
+        //    ChannelsRange.Comment = "123";
 
-            var channels = new List<string>();
-            for (int i = 0; i < 8; i++)
-            {
-                channels.Add($"Channel{i + 1}");
-            }
-            ChannelsRange.Data = channels;
+        //    var channels = new List<string>();
+        //    for (int i = 0; i < 8; i++)
+        //    {
+        //        channels.Add($"Channel{i + 1}");
+        //    }
+        //    ChannelsRange.Data = channels;
 
 
-            PropRange = Sheet.DefineNamedRange(Props, "B1:B8");
-            PropRange.IsReadonly = true;
+        //    PropRange = Sheet.DefineNamedRange(Props, "B1:B8");
+        //    PropRange.IsReadonly = true;
 
-            PropRange.Data = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" }; ;
-        }
+        //    PropRange.Data = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" }; ;
+        //}
 
         #endregion Init Reogrid
 
