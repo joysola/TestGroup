@@ -4,20 +4,22 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using TestReoGrid.DataFormats;
 using TestReoGrid.Helpers;
 using TestReoGrid.Models;
 using TestReoGrid.Models.Enums;
 using TestReoGrid.Models.ReoGrid.Old;
 using unvell.ReoGrid;
 using unvell.ReoGrid.Data;
+using unvell.ReoGrid.DataFormat;
 using unvell.ReoGrid.Graphics;
-
 namespace TestReoGrid
 {
     public partial class MainWindowViewModel : ObservableRecipient
@@ -203,7 +205,7 @@ namespace TestReoGrid
                 var allSPs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
                 foreach (var ch in Serial.SolutionChannels)
                 {
-                    var sp = DataGenerateHelper.CreateSP(SelectedFilterCol); // 必须重新生成一个
+                    var sp = ReoSoluParamValueHelper.CreateSP(SelectedFilterCol); // 必须重新生成一个
                     var existeSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName == SelectedFilterCol);
                     if (existeSP is null)
                     {
@@ -282,7 +284,9 @@ namespace TestReoGrid
                 // from
                 Sheet.IterateCells(e.FromRange, (row, col, cell) =>
                 {
-                    Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                    var spv = Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                    RestoreBorder(cell.Row, cell.Column);
+                    RestoreDataFormat(cell.Row, cell.Column);
                     return true;
                 });
 
@@ -306,6 +310,8 @@ namespace TestReoGrid
                             ParamName = sp.ParamName,
                         };
                         sp.ParamValues.Add(spv);
+                        Validate(spv);
+
                     }
                     return true;
                 });
@@ -378,11 +384,15 @@ namespace TestReoGrid
                 var sp = Serial.SolutionChannels.FindSoluParam(row, col);
                 var oldSpv = sp.FindSoluParamValue(row, col);
                 sp?.ParamValues?.Remove(oldSpv); // 目标位置已经有值，则先删除
+                RestoreBorder(cell.Row, cell.Column);
+                RestoreDataFormat(cell.Row, cell.Column);
 
                 if (sp is not null)
                 {
                     spv.ParamName = sp.ParamName;
                     sp.ParamValues.Add(spv);
+
+                    Validate(spv);
                 }
 
                 return true;
@@ -405,6 +415,8 @@ namespace TestReoGrid
                     Sheet.IterateCells(e.Range, (row, col, cell) =>
                     {
                         Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                        RestoreBorder(cell.Row, cell.Column);
+                        RestoreDataFormat(cell.Row, cell.Column);
 
                         return true;
                     });
@@ -413,7 +425,9 @@ namespace TestReoGrid
                 case OperEnum.Delete:
                     Sheet.IterateCells(e.Range, (row, col, cell) =>
                     {
-                        Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                        var spv = Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                        RestoreBorder(cell.Row, cell.Column);
+                        RestoreDataFormat(cell.Row, cell.Column);
 
                         return true;
                     });
@@ -453,7 +467,7 @@ namespace TestReoGrid
                     var spv = sp.FindSoluParamValue(row, col);
                     if (spv is null)
                     {
-                        sp.ParamValues.Add(new SolutionParamValue()
+                        spv = new SolutionParamValue()
                         {
                             //NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
                             RowStart = sp.RowStart,
@@ -462,7 +476,8 @@ namespace TestReoGrid
                             ColEnd = col,
                             ParamName = sp.ParamName,
                             ParamValue = $"{data}",
-                        });
+                        };
+                        sp.ParamValues.Add(spv);
                     }
                     else
                     {
@@ -475,6 +490,8 @@ namespace TestReoGrid
                             spv.ParamValue = $"{data}";
                         }
                     }
+
+                    Validate(spv);
                 }
             }
         }
@@ -482,39 +499,83 @@ namespace TestReoGrid
         #endregion Operation
 
         #region Style
-        public void SetDangerStyle(Cell cell)
-        {
-            if (cell is not null)
-            {
-                cell.Border.All = new RangeBorderStyle()
-                {
-                    Color = ((Brush)Application.Current.Resources["PL_DangerBrush"]).ToReoColor(),
-                    Style = BorderLineStyle.Solid,
-                };
-            }
-        }
-        public void RestoreStyle(Cell cell)
-        {
-            if (cell is not null)
-            {
-                cell.Border.All = RangeBorderStyle.Empty;
-            }
-        }
+        //public void SetDangerStyle(Cell cell)
+        //{
+        //    if (cell is not null)
+        //    {
+        //        cell.Border.All = new RangeBorderStyle()
+        //        {
+        //            Color = ((Brush)Application.Current.Resources["PL_DangerBrush"]).ToReoColor(),
+        //            Style = BorderLineStyle.Solid,
+        //        };
+        //    }
+        //}
+        //public void RestoreStyle(Cell cell)
+        //{
+        //    if (cell is not null)
+        //    {
+        //        cell.Border.All = RangeBorderStyle.Empty;
+        //    }
+        //}
 
-       
 
-        public void SetDangerBorder(int row, int col, int rows, int cols)
-        {
-            Sheet.SetRangeBorders(row, col, rows, cols, BorderPositions.InsideAll, _dangerRangeBdStyle);
-        }
 
-        public void RestoreBorder(int row, int col, int rows, int cols)
-        {
-            Sheet.RemoveRangeBorders(new RangePosition(row, col, rows, cols), BorderPositions.InsideAll);
-        }
+
 
 
         #endregion Style
+
+        #region Validation
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="spv"></param>
+        private void Validate(SolutionParamValue spv, Cell cell = null)
+        {
+            if (spv is not null)
+            {
+                var rule = ValidateHelper.SoluRuleDict[spv.ParamName];
+                var validationResult = rule.Validate(spv.ParamValue, CultureInfo.CurrentCulture);
+                spv.IsEnabled = validationResult.IsValid;
+
+                SetDataFormat(spv);
+                if (validationResult.IsValid)
+                {
+                    RestoreBorder(spv.RowStart, spv.ColStart);
+                }
+                else
+                {
+                    SetDangerBorder(spv.RowStart, spv.ColStart);
+                }
+            }
+        }
+
+        public void SetDangerBorder(int row, int col, int rows = 1, int cols = 1)
+        {
+            Sheet.SetRangeBorders(row, col, rows, cols, BorderPositions.Outside, _dangerRangeBdStyle);
+        }
+
+        public void RestoreBorder(int row, int col, int rows = 1, int cols = 1)
+        {
+            Sheet.RemoveRangeBorders(new RangePosition(row, col, rows, cols), BorderPositions.Outside);
+        }
+
+        #endregion Validation
+
+        private void SetDataFormat(SolutionParamValue spv)
+        {
+            var places = ReoSoluParamValueHelper.GetDecimalPlaces(spv.ParamName);
+            if (places > -1)
+            {
+               // Sheet.SetRangeDataFormat(spv.RowStart, spv.ColStart, spv.Rows, spv.Cols, CellDataFormatFlag.Custom, new DoubleDataFormt());
+            }
+        }
+
+        private void RestoreDataFormat(int row, int col, int rows = 1, int cols = 1)
+        {
+            Sheet.DeleteRangeDataFormat(new RangePosition(row, col, rows, cols));
+        }
 
         #region Init Reogrid
         private void InitSetting(ReoGridControl reoGrid)
@@ -525,6 +586,8 @@ namespace TestReoGrid
 
             var sheet = reoGrid.CurrentWorksheet;
             sheet.Name = "Serial";
+
+            //DataFormatterManager.Instance.DataFormatters.Add(CellDataFormatFlag.Custom, new DoubleDataFormt());
         }
 
 
@@ -586,6 +649,5 @@ namespace TestReoGrid
         //}
 
         #endregion Init Reogrid
-
     }
 }
