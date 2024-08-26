@@ -36,6 +36,14 @@ namespace TestReoGrid.Helpers
             return spv;
         }
 
+        public static SerialSolutionChannel FindSolutionChannel(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
+        {
+            SerialSolutionChannel soluCh = null;
+            soluCh = solutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
+            return soluCh;
+        }
+
+
         public static bool RemoveSoluParamValue(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
         {
             var result = false;

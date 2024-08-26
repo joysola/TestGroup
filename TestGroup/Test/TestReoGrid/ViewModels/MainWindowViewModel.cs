@@ -37,6 +37,15 @@ namespace TestReoGrid
             Color = ((Brush)Application.Current.Resources["PL_DangerBrush"]).ToReoColor(),
             Style = BorderLineStyle.Solid
         };
+
+        [ObservableProperty]
+        private PL_Exp_Dsgn_Inject _solutionInject = new()
+        {
+            Concentration = 1.0,
+            Molecular_Weight = 100,
+        };
+
+
         [ObservableProperty]
         private ReoGridControl _reoGrid;
 
@@ -573,14 +582,9 @@ namespace TestReoGrid
 
 
 
-
+        #region CellEvents
         private void Sheet_CellMouseLeave(object sender, unvell.ReoGrid.Events.CellMouseEventArgs e)
         {
-            //var sp = Serial.SolutionChannels.FindSoluParam(e.Cell.Row, e.Cell.Column);
-            //var spv = sp.FindSoluParamValue(e.Cell.Row, e.Cell.Column);
-            //if (spv != null && spv.HasError)
-            //{
-            //}
             if (_toolTip.IsOpen)
             {
                 _toolTip.IsOpen = false;
@@ -613,8 +617,62 @@ namespace TestReoGrid
             }
             //}
         }
+        #endregion CellEvents
 
         #endregion Validation
+
+
+        #region AutoCalculate
+        private void AutoCalcuate(SolutionParamValue spv)
+        {
+            if (spv.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
+            {
+                var ch = Serial.SolutionChannels.FindSolutionChannel(spv.RowStart, spv.ColStart);
+                var sps = ch.SolutionParamList;
+                var col = spv.ColStart;
+                var colSPVs = sps.SelectMany(x => x.ParamValues).Where(x => x.ColStart == col).ToList();
+
+                if (spv.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
+                {
+                    var autoParam = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                    var concParam = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
+                    var mwParam = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+
+                    if (autoParam is not null)
+                    {
+                        var conc = SolutionInject.Concentration;
+                        var mw = SolutionInject.Molecular_Weight;
+
+                        //var paramConcStr = concParam?.ParamValues[i]?.ParamValue;
+                        //if (paramConcStr is not null && double.TryParse(paramConcStr, out double paramConc))
+                        //{
+                        //    conc = paramConc;
+                        //}
+
+                        //var paramMWStr = mwParam?.ParamValues[i]?.ParamValue;
+                        //if (paramMWStr is not null && int.TryParse(paramMWStr, out int paramMW))
+                        //{
+                        //    mw = paramMW;
+                        //}
+                        //if ((concParam is not null && string.IsNullOrWhiteSpace(paramConcStr)) ||
+                        //    (mwParam is not null && string.IsNullOrWhiteSpace(paramMWStr)))
+                        //{
+
+                        //    autoParam.ParamValues[i].ParamValue = null;
+                        //}
+                        //else
+                        //{
+                        //    //autoParam.ParamValues[i].ParamValue = $"{mw * conc / 1000}";
+                        //    autoParam.ParamValues[i].ParamValue = $"{MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType)}";
+                        //}
+                    }
+                }
+            }
+        }
+
+
+        #endregion AutoCalculate
+
 
         private void SetDataFormat(SolutionParamValue spv)
         {
