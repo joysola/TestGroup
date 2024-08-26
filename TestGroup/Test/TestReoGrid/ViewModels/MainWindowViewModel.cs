@@ -24,8 +24,14 @@ namespace TestReoGrid
 {
     public partial class MainWindowViewModel : ObservableRecipient
     {
-        private const string Channels = "Channels";
-        private const string Props = "Props";
+        private ToolTip _toolTip = new()
+        {
+            Foreground = (Brush)Application.Current.Resources["PL_DangerBrush"],
+        };
+
+        //private const string Channels = "Channels";
+        //private const string Props = "Props";
+
         private RangeBorderStyle _dangerRangeBdStyle = new()
         {
             Color = ((Brush)Application.Current.Resources["PL_DangerBrush"]).ToReoColor(),
@@ -91,6 +97,7 @@ namespace TestReoGrid
             Serial = DataGenerateHelper.CreateNamedRanges(Sheet);
             DataGenerateHelper.InitSerial(Serial, Sheet);
 
+            _toolTip.PlacementTarget = this.ReoGrid;
             //Sheet.AfterRangeCopy += Sheet_AfterRangeCopy;
             //Sheet.AfterCut += Sheet_AfterCut;
             //Sheet.BeforeCopyCellContent += Sheet_BeforeCopyCellContent;
@@ -111,6 +118,9 @@ namespace TestReoGrid
             Sheet.RangeDataChanged += Sheet_RangeDataChanged;
             Sheet.BeforeDeleteCellContent += Sheet_BeforeDeleteCellContent;
 
+            //Sheet.CellMouseMove += Sheet_CellMouseEnter;
+            Sheet.CellMouseEnter += Sheet_CellMouseEnter;
+            Sheet.CellMouseLeave += Sheet_CellMouseLeave;
             //Sheet.RowsDeleted += Sheet_RowsDeleted;
         }
 
@@ -537,7 +547,7 @@ namespace TestReoGrid
             {
                 var rule = ValidateHelper.SoluRuleDict[spv.ParamName];
                 var validationResult = rule.Validate(spv.ParamValue, CultureInfo.CurrentCulture);
-                spv.IsEnabled = validationResult.IsValid;
+                spv.HasError = !validationResult.IsValid;
 
                 SetDataFormat(spv);
                 if (validationResult.IsValid)
@@ -561,6 +571,49 @@ namespace TestReoGrid
             Sheet.RemoveRangeBorders(new RangePosition(row, col, rows, cols), BorderPositions.Outside);
         }
 
+
+
+
+        private void Sheet_CellMouseLeave(object sender, unvell.ReoGrid.Events.CellMouseEventArgs e)
+        {
+            //var sp = Serial.SolutionChannels.FindSoluParam(e.Cell.Row, e.Cell.Column);
+            //var spv = sp.FindSoluParamValue(e.Cell.Row, e.Cell.Column);
+            //if (spv != null && spv.HasError)
+            //{
+            //}
+            if (_toolTip.IsOpen)
+            {
+                _toolTip.IsOpen = false;
+            }
+        }
+
+        private void Sheet_CellMouseEnter(object sender, unvell.ReoGrid.Events.CellMouseEventArgs e)
+        {
+            var cell = Sheet.GetCell(e.CellPosition);
+
+            if (cell is not null)
+            {
+                var row = cell.Row;
+                var col = cell.Column;
+                var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                var spv = sp.FindSoluParamValue(row, col);
+                if (spv != null)
+                {
+                    if (spv.HasError)
+                    {
+                        var rule = ValidateHelper.SoluRuleDict[spv.ParamName];
+                        var validationResult = rule.Validate(spv.ParamValue, CultureInfo.CurrentCulture);
+
+                        //_toolTip.Foreground = (Brush)Application.Current.Resources["PL_DangerBrush"];
+                        _toolTip.VerticalOffset = -20; // 调整位置
+                        _toolTip.Content = validationResult.ErrorContent;
+                        _toolTip.IsOpen = true;
+                    }
+                }
+            }
+            //}
+        }
+
         #endregion Validation
 
         private void SetDataFormat(SolutionParamValue spv)
@@ -568,7 +621,7 @@ namespace TestReoGrid
             var places = ReoSoluParamValueHelper.GetDecimalPlaces(spv.ParamName);
             if (places > -1)
             {
-               // Sheet.SetRangeDataFormat(spv.RowStart, spv.ColStart, spv.Rows, spv.Cols, CellDataFormatFlag.Custom, new DoubleDataFormt());
+                // Sheet.SetRangeDataFormat(spv.RowStart, spv.ColStart, spv.Rows, spv.Cols, CellDataFormatFlag.Custom, new DoubleDataFormt());
             }
         }
 
