@@ -634,37 +634,37 @@ namespace TestReoGrid
 
                 if (spv.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
                 {
-                    var autoParam = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
-                    var concParam = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
-                    var mwParam = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+                    var autoSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                    var concSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
+                    var mwSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
 
-                    if (autoParam is not null)
+                    if (autoSpv is not null)
                     {
                         var conc = SolutionInject.Concentration;
                         var mw = SolutionInject.Molecular_Weight;
 
-                        //var paramConcStr = concParam?.ParamValues[i]?.ParamValue;
-                        //if (paramConcStr is not null && double.TryParse(paramConcStr, out double paramConc))
-                        //{
-                        //    conc = paramConc;
-                        //}
+                        var concStr = concSpv?.ParamValue;
+                        if (concStr is not null && double.TryParse(concStr, out double paramConc))
+                        {
+                            conc = paramConc;
+                        }
 
-                        //var paramMWStr = mwParam?.ParamValues[i]?.ParamValue;
-                        //if (paramMWStr is not null && int.TryParse(paramMWStr, out int paramMW))
-                        //{
-                        //    mw = paramMW;
-                        //}
-                        //if ((concParam is not null && string.IsNullOrWhiteSpace(paramConcStr)) ||
-                        //    (mwParam is not null && string.IsNullOrWhiteSpace(paramMWStr)))
-                        //{
+                        var mwStr = mwSpv?.ParamValue;
+                        if (mwStr is not null && int.TryParse(mwStr, out int paramMW))
+                        {
+                            mw = paramMW;
+                        }
+                        if ((concSpv is not null && string.IsNullOrWhiteSpace(concStr)) ||
+                            (mwSpv is not null && string.IsNullOrWhiteSpace(mwStr)))
+                        {
 
-                        //    autoParam.ParamValues[i].ParamValue = null;
-                        //}
-                        //else
-                        //{
-                        //    //autoParam.ParamValues[i].ParamValue = $"{mw * conc / 1000}";
-                        //    autoParam.ParamValues[i].ParamValue = $"{MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType)}";
-                        //}
+                            autoSpv.ParamValue = null;
+                        }
+                        else
+                        {
+                            //autoParam.ParamValues[i].ParamValue = $"{mw * conc / 1000}";
+                            autoSpv.ParamValue = $"{MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType)}";
+                        }
                     }
                 }
             }
