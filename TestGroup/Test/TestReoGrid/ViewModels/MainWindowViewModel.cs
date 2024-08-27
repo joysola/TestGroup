@@ -20,6 +20,7 @@ using unvell.ReoGrid;
 using unvell.ReoGrid.Data;
 using unvell.ReoGrid.DataFormat;
 using unvell.ReoGrid.Graphics;
+
 namespace TestReoGrid
 {
     public partial class MainWindowViewModel : ObservableRecipient
@@ -43,6 +44,7 @@ namespace TestReoGrid
         {
             Concentration = 1.0,
             Molecular_Weight = 100,
+            UnitType = UnitTypeEnum.Mole,
         };
 
 
@@ -303,9 +305,13 @@ namespace TestReoGrid
                 // from
                 Sheet.IterateCells(e.FromRange, (row, col, cell) =>
                 {
-                    var spv = Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                    var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
+
+                    Serial.SolutionChannels.RemoveSoluParamValue(row, col);
                     RestoreBorder(cell.Row, cell.Column);
                     RestoreDataFormat(cell.Row, cell.Column);
+
+                    AutoCalcuate(row, col, spv.ParamName);
                     return true;
                 });
 
@@ -319,18 +325,20 @@ namespace TestReoGrid
                         var spv = sp.FindSoluParamValue(row, col);
                         sp?.ParamValues?.Remove(spv);
 
-                        spv = new SolutionParamValue
-                        {
-                            RowStart = row,
-                            RowEnd = row,
-                            ColStart = col,
-                            ColEnd = col,
-                            ParamValue = $"{cell.Data}",
-                            ParamName = sp.ParamName,
-                        };
+                        spv = CreateSPV(row, col, sp.ParamName, cell.Data);
+                        //new SolutionParamValue
+                        //{
+                        //    RowStart = row,
+                        //    RowEnd = row,
+                        //    ColStart = col,
+                        //    ColEnd = col,
+                        //    ParamValue = $"{cell.Data}",
+                        //    ParamName = sp.ParamName,
+                        //};
                         sp.ParamValues.Add(spv);
                         Validate(spv);
 
+                        AutoCalcuate(row, col, spv.ParamName);
                     }
                     return true;
                 });
@@ -392,14 +400,14 @@ namespace TestReoGrid
         {
             Sheet.IterateCells(e.Range, (row, col, cell) =>
             {
-                var spv = new SolutionParamValue
-                {
-                    RowStart = row,
-                    RowEnd = row,
-                    ColStart = col,
-                    ColEnd = col,
-                    ParamValue = $"{cell.Data}",
-                };
+                //new SolutionParamValue
+                //{
+                //    RowStart = row,
+                //    RowEnd = row,
+                //    ColStart = col,
+                //    ColEnd = col,
+                //    ParamValue = $"{cell.Data}",
+                //};
                 var sp = Serial.SolutionChannels.FindSoluParam(row, col);
                 var oldSpv = sp.FindSoluParamValue(row, col);
                 sp?.ParamValues?.Remove(oldSpv); // 目标位置已经有值，则先删除
@@ -408,10 +416,12 @@ namespace TestReoGrid
 
                 if (sp is not null)
                 {
-                    spv.ParamName = sp.ParamName;
+                    var spv = CreateSPV(row, col, sp.ParamName, cell.Data);
+                    //spv.ParamName = sp.ParamName;
                     sp.ParamValues.Add(spv);
 
                     Validate(spv);
+                    AutoCalcuate(row, col, spv.ParamName);
                 }
 
                 return true;
@@ -433,10 +443,13 @@ namespace TestReoGrid
                 case OperEnum.Copy:
                     Sheet.IterateCells(e.Range, (row, col, cell) =>
                     {
+                        var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
+
                         Serial.SolutionChannels.RemoveSoluParamValue(row, col);
                         RestoreBorder(cell.Row, cell.Column);
                         RestoreDataFormat(cell.Row, cell.Column);
 
+                        AutoCalcuate(row, col, spv.ParamName);
                         return true;
                     });
                     break;
@@ -444,9 +457,12 @@ namespace TestReoGrid
                 case OperEnum.Delete:
                     Sheet.IterateCells(e.Range, (row, col, cell) =>
                     {
-                        var spv = Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                        var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
+
+                        Serial.SolutionChannels.RemoveSoluParamValue(row, col);
                         RestoreBorder(cell.Row, cell.Column);
                         RestoreDataFormat(cell.Row, cell.Column);
+                        AutoCalcuate(row, col, spv.ParamName);
 
                         return true;
                     });
@@ -486,16 +502,18 @@ namespace TestReoGrid
                     var spv = sp.FindSoluParamValue(row, col);
                     if (spv is null)
                     {
-                        spv = new SolutionParamValue()
-                        {
-                            //NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
-                            RowStart = sp.RowStart,
-                            RowEnd = sp.RowStart,
-                            ColStart = col,
-                            ColEnd = col,
-                            ParamName = sp.ParamName,
-                            ParamValue = $"{data}",
-                        };
+
+                        spv = CreateSPV(row, col, sp.ParamName, data);
+                        //    new SolutionParamValue()
+                        //{
+                        //    //NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
+                        //    RowStart = sp.RowStart,
+                        //    RowEnd = sp.RowStart,
+                        //    ColStart = col,
+                        //    ColEnd = col,
+                        //    ParamName = sp.ParamName,
+                        //    ParamValue = $"{data}",
+                        //};
                         sp.ParamValues.Add(spv);
                     }
                     else
@@ -511,6 +529,7 @@ namespace TestReoGrid
                     }
 
                     Validate(spv);
+                    AutoCalcuate(row, col, spv.ParamName);
                 }
             }
         }
@@ -623,50 +642,61 @@ namespace TestReoGrid
 
 
         #region AutoCalculate
-        private void AutoCalcuate(SolutionParamValue spv)
+        private void AutoCalcuate(int row, int col, string paramName)
         {
-            if (spv.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
+            if (paramName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
             {
-                var ch = Serial.SolutionChannels.FindSolutionChannel(spv.RowStart, spv.ColStart);
+                var ch = Serial.SolutionChannels.FindSolutionChannel(row, col);
                 var sps = ch.SolutionParamList;
-                var col = spv.ColStart;
+                var autoSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+
+
                 var colSPVs = sps.SelectMany(x => x.ParamValues).Where(x => x.ColStart == col).ToList();
 
-                if (spv.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
+                var autoSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                if (autoSpv is null)
                 {
-                    var autoSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
-                    var concSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
-                    var mwSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
-
-                    if (autoSpv is not null)
-                    {
-                        var conc = SolutionInject.Concentration;
-                        var mw = SolutionInject.Molecular_Weight;
-
-                        var concStr = concSpv?.ParamValue;
-                        if (concStr is not null && double.TryParse(concStr, out double paramConc))
-                        {
-                            conc = paramConc;
-                        }
-
-                        var mwStr = mwSpv?.ParamValue;
-                        if (mwStr is not null && int.TryParse(mwStr, out int paramMW))
-                        {
-                            mw = paramMW;
-                        }
-                        if ((concSpv is not null && string.IsNullOrWhiteSpace(concStr)) ||
-                            (mwSpv is not null && string.IsNullOrWhiteSpace(mwStr)))
-                        {
-
-                            autoSpv.ParamValue = null;
-                        }
-                        else
-                        {
-                            //autoParam.ParamValues[i].ParamValue = $"{mw * conc / 1000}";
-                            autoSpv.ParamValue = $"{MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType)}";
-                        }
-                    }
+                    autoSpv = CreateSPV(autoSP.RowStart, col, autoSP.ParamName, null);
+                    Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
                 }
+
+                var concSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
+                var mwSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+
+
+
+                if (autoSpv is not null)
+                {
+                    var conc = SolutionInject.Concentration;
+                    var mw = SolutionInject.Molecular_Weight;
+
+                    var concStr = concSpv?.ParamValue;
+                    if (concStr is not null && double.TryParse(concStr, out double paramConc))
+                    {
+                        conc = paramConc;
+                    }
+
+                    var mwStr = mwSpv?.ParamValue;
+                    if (mwStr is not null && int.TryParse(mwStr, out int paramMW))
+                    {
+                        mw = paramMW;
+                    }
+
+                    if ((concSpv is not null && string.IsNullOrWhiteSpace(concStr)) ||
+                        (mwSpv is not null && string.IsNullOrWhiteSpace(mwStr)))
+                    {
+
+                        autoSpv.ParamValue = null;
+
+                    }
+                    else
+                    {
+                        autoSpv.ParamValue = $"{MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType)}";
+                    }
+
+                    Sheet.SetCellData(autoSpv.RowStart, autoSpv.ColStart, autoSpv.ParamValue);
+                }
+
             }
         }
 
@@ -687,6 +717,27 @@ namespace TestReoGrid
         {
             Sheet.DeleteRangeDataFormat(new RangePosition(row, col, rows, cols));
         }
+
+
+
+        private SolutionParamValue CreateSPV(int row, int col, string paramName, object data)
+        {
+            SolutionParamValue spv = null;
+            if (row > -1 && col > -1 && paramName is { Length: > 0 })
+            {
+                spv = new SolutionParamValue
+                {
+                    RowStart = row,
+                    RowEnd = row,
+                    ColStart = col,
+                    ColEnd = col,
+                    ParamValue = $"{data}",
+                    ParamName = paramName,
+                };
+            }
+            return spv;
+        }
+
 
         #region Init Reogrid
         private void InitSetting(ReoGridControl reoGrid)

@@ -36,6 +36,19 @@ namespace TestReoGrid.Helpers
             return spv;
         }
 
+        public static SolutionParamValue FindSoluParamValue(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
+        {
+            SolutionParamValue spv = null;
+            var sp = FindSoluParam(solutionChannels, row, col);
+            if (sp is not null && row > -1 && col > -1)
+            {
+                spv = sp.ParamValues.FirstOrDefault(x => x.RowStart == row && x.ColStart == col);
+            }
+            return spv;
+        }
+
+
+
         public static SerialSolutionChannel FindSolutionChannel(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
         {
             SerialSolutionChannel soluCh = null;
