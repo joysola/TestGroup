@@ -20,7 +20,7 @@ namespace TestReoGrid.Models
         /// serial的参数布置
         /// </summary>
         [ObservableProperty]
-        private ObservableCollection<SolutionParam> _solutionParamList = new();
+        private ObservableCollection<SolutionParam> _solutionParamList = [];
 
 
 

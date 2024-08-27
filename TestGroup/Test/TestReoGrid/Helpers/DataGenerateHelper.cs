@@ -191,43 +191,20 @@ namespace TestReoGrid.Helpers
                     ChannelInfo = ch,
                 };
 
-                var nameSP = ReoSoluParamValueHelper.CreateSP(nameof(PL_Exp_Dsgn_Inject.Solution_Name));
-                //{
-                //    ParamName = nameof(PL_Exp_Dsgn_Inject.Solution_Name),
-                //    ParamAlias = "Name",
-                //    ParamType = typeof(string),
-                //    VarType = VarTypeEnum.Solution,
-                //    //ValidationKey = , // 验证校验
-                //};
+                //var nameSP = ReoSoluParamValueHelper.CreateSP(nameof(PL_Exp_Dsgn_Inject.Solution_Name));
 
-                var ConcSP = ReoSoluParamValueHelper.CreateSP(nameof(PL_Exp_Dsgn_Inject.Concentration));
-                //{
-                //    ParamName = nameof(PL_Exp_Dsgn_Inject.Concentration),
-                //    ParamAlias = "Conc.",
-                //    ParamType = typeof(double),
-                //    VarType = VarTypeEnum.Solution,
-                //    //ValidationKey = , // 验证校验
-                //};
 
-                var MWSP = ReoSoluParamValueHelper.CreateSP(nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
-                //{
-                //    ParamName = nameof(PL_Exp_Dsgn_Inject.Molecular_Weight),
-                //    ParamAlias = "MW",
-                //    ParamType = typeof(int),
-                //    VarType = VarTypeEnum.Solution,
-                //    //ValidationKey = , // 验证校验
-                //};
+                // var ConcSP = ReoSoluParamValueHelper.CreateSP(nameof(PL_Exp_Dsgn_Inject.Concentration));
 
-                var massConcSP = ReoSoluParamValueHelper.CreateSP(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
-                //{
-                //    ParamName = nameof(PL_Exp_Dsgn_Inject.Mass_concentration),
-                //    ParamAlias = "Mass Conc.",
-                //    ParamType = typeof(double),
-                //    VarType = VarTypeEnum.Solution,
-                //    //ValidationKey = , // 验证校验
-                //};
 
-                serialSoluCh.SolutionParamList = [nameSP, ConcSP, MWSP, massConcSP];
+
+                // var MWSP = ReoSoluParamValueHelper.CreateSP(nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+
+
+                //var massConcSP = ReoSoluParamValueHelper.CreateSP(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+
+
+                //serialSoluCh.SolutionParamList = [nameSP, ConcSP, MWSP, massConcSP];
 
                 result.Add(serialSoluCh);
             }
@@ -253,7 +230,12 @@ namespace TestReoGrid.Helpers
                 }
                 var ch = rawDatas[r];
                 ch.RowStart = preRows/* + 1*/; // 从0开始算
-                ch.RowEnd = ch.RowStart + ch.SolutionParamList.Count - 1;
+                var spCount = ch.SolutionParamList.Count;
+                if (spCount == 0)
+                {
+                    spCount = 1;
+                }
+                ch.RowEnd = ch.RowStart + spCount - 1;
                 ch.ColStart = 0/*1*/;
                 ch.ColEnd = 0;
 
@@ -292,21 +274,23 @@ namespace TestReoGrid.Helpers
                 foreach (var ch in solutionChannels)
                 {
                     serial.SolutionChannels.Add(ch);
-                    var chRange = sheet.DefineNamedRange(ch.NameKey, ch.RowStart, ch.ColStart, ch.Rows, ch.Cols);
-                    serial.ChNamedRanges.Add(chRange);
-
-                    //foreach (var p in ch.SolutionParamList)
+                    //if (ch.SolutionParamList?.Count > 0)
                     //{
-                    //    //serial.PropRows.Add(p);
-                    //    var pRange = sheet.DefineNamedRange(p.NameKey, p.RowStart, p.ColStart, p.Rows, p.Cols);
-                    //    serial.PropNamedRanges.Add(pRange);
-                    //    foreach (var v in p.ParamValues)
-                    //    {
-                    //        //serial.ValCells.Add(v);
-                    //        var vRange = sheet.DefineNamedRange(v.NameKey, v.RowStart, v.ColStart, v.Rows, v.Cols);
-                    //        serial.ValNamedRanges.Add(vRange);
-                    //    }
+                    //    var chRange = sheet.DefineNamedRange(ch.NameKey, ch.RowStart, ch.ColStart, ch.Rows, ch.Cols);
+                    //    serial.ChNamedRanges.Add(chRange);
                     //}
+                    ////foreach (var p in ch.SolutionParamList)
+                    ////{
+                    ////    //serial.PropRows.Add(p);
+                    ////    var pRange = sheet.DefineNamedRange(p.NameKey, p.RowStart, p.ColStart, p.Rows, p.Cols);
+                    ////    serial.PropNamedRanges.Add(pRange);
+                    ////    foreach (var v in p.ParamValues)
+                    ////    {
+                    ////        //serial.ValCells.Add(v);
+                    ////        var vRange = sheet.DefineNamedRange(v.NameKey, v.RowStart, v.ColStart, v.Rows, v.Cols);
+                    ////        serial.ValNamedRanges.Add(vRange);
+                    ////    }
+                    ////}
                 }
             }
             return serial;
@@ -320,76 +304,12 @@ namespace TestReoGrid.Helpers
 
 
 
-        public static void InitSerial(SerialRange serial, Worksheet sheet)
-        {
-            // 1. 设置列宽（前两列需要加宽）
-            sheet.SetColumnsWidth(0, 1, 120);
-            sheet.SetColumnsWidth(1, 1, 100);
-
-            // 2. 填充部分数据
-            for (int i = 0; i < serial.ChNamedRanges.Count; i++)
-            {
-                // 1-1 channel的范围1格
-                var chRange = serial.ChNamedRanges[i];
-                var chD = serial.SolutionChannels[i];
-
-                chRange.Style.HorizontalAlign = ReoGridHorAlign.Center;
-                chRange.Style.VerticalAlign = ReoGridVerAlign.Middle;
-                chRange.IsReadonly = true;
-                // 合并成1列
-                sheet.MergeRange(chRange);
-                chRange.Data = new[] { $"channel{serial.SolutionChannels[i].ChannelInfo.Channel_No + 1}" };
-
-                for (int j = 0; j < chD.SolutionParamList.Count; j++)
-                {
-                    // 1-2. Prop的范围1格
-                    var propD = chD.SolutionParamList[j];
-
-                    var propCell = sheet.CreateAndGetCell(propD.RowStart, propD.ColStart);
-                    propCell.Data = propD.ParamAlias;
-                    propCell.IsReadOnly = true;
-                    // 1-3. val的范围1格
-                    for (int k = 0; k < propD.ParamValues.Count; k++)
-                    {
-                        var valD = propD.ParamValues[k];
-                        var valCell = sheet.CreateAndGetCell(valD.RowStart, valD.ColStart);
-                        valCell.Data = valD.ParamValue;
-                    }
-                }
-            }
-
-            // 3. 调整sheet的最大行数
-            var rows = serial.SolutionChannels.Max(x => x.RowEnd) + 1;
-            sheet.SetRows(rows);
-        }
 
 
 
 
-        public static List<SerialSolutionChannel> GetSerialData(SerialRange serial, Worksheet sheet)
-        {
-            var result = new List<SerialSolutionChannel>();
-            if (serial is not null && sheet is not null)
-            {
-                foreach (var rCh in serial.SolutionChannels)
-                {
-                    var newCh = _mapper.Map<SerialSolutionChannel>(rCh);
-                    //newCh.SolutionParamList.Clear();
-                    //foreach (var rP in rCh.Props)
-                    //{
-                    //    var sp = _mapper.Map<SolutionParam>(rP);
-                    //    foreach (var rC in rP.Cells)
-                    //    {
-                    //        var spv = _mapper.Map<SolutionParamValue>(rC);
-                    //        sp.ParamValues.Add(spv);
-                    //    }
-                    //    newCh.SolutionParamList.Add(sp);
-                    //}
-                    result.Add(newCh);
-                }
-            }
-            return result;
-        }
+
+
 
 
         #endregion Serial

@@ -12,43 +12,100 @@
         d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
         mc:Ignorable="d"
         Title="MainWindow"
-        Height="450"
-        Width="800">
+        Height="550"
+        Width="900">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal"
-                    Margin="0,0,0,10">
-            <Button Style="{StaticResource ButtonDashedPrimary.Small}"
-                    Command="{Binding SetFilterCommand}"
-                    Content="Test" />
-            <!--SelectedItem="{Binding SelectedFilterCol}"-->
-            <hc:ComboBox Style="{StaticResource ComboBoxPlus.Small}"
-                         hc:InfoElement.ShowClearButton="True"
-                         ItemsSource="{Binding FilterDict}"
-                         SelectedValuePath="Key"
-                         DisplayMemberPath="Value"
-                         d:ItemsSource="{d:SampleData ItemCount=6}"
-                         SelectedValue="{Binding SelectedFilterCol}"
-                         MinWidth="100"
-                         Margin="20,0,0,0" />
-            <Button Style="{StaticResource ButtonDashedPrimary.Small}"
-                    Margin="20,0,0,0"
-                    Command="{Binding GetSerialDataCommand}"
-                    Content="GetSerialData" />
+        <UniformGrid Rows="2"
+                     Columns="1">
+            <StackPanel Orientation="Horizontal"
+                        Margin="0,0,0,10">
+                <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                        Command="{Binding SetFilterCommand}"
+                        Content="Test" />
+                <!--SelectedItem="{Binding SelectedFilterCol}"-->
+                <!--<hc:ComboBox Style="{StaticResource ComboBoxPlus.Small}"
+                             hc:InfoElement.ShowClearButton="True"
+                             ItemsSource="{Binding FilterDict}"
+                             SelectedValuePath="Key"
+                             DisplayMemberPath="Value"
+                             d:ItemsSource="{d:SampleData ItemCount=6}"
+                             SelectedValue="{Binding SelectedFilterCol}"
+                             MinWidth="100"
+                             Margin="20,0,0,0" />-->
+                
+                <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                        Margin="20,0,0,0"
+                        Command="{Binding GetSerialDataCommand}"
+                        CommandParameter="{Binding SelectedFilterCol}"
+                        Content="GetSerialData" />
 
-            <Button Style="{StaticResource ButtonDashedPrimary.Small}"
-                    Margin="20,0,0,0"
-                    Command="{Binding DeletePropCommand}"
-                    Content="DeleteProp" />
+                <!--<Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                        Margin="20,0,0,0"
+                        Command="{Binding DeletePropCommand}"
+                        CommandParameter="{Binding SelectedFilterCol}"
+                        Content="DeleteProp" />
 
-            <Button Style="{StaticResource ButtonDashedPrimary.Small}"
-                    Margin="20,0,0,0"
-                    Command="{Binding AddPropCommand}"
-                    Content="AddProp" />
-        </StackPanel>
+                <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                        Margin="20,0,0,0"
+                        Command="{Binding AddPropCommand}"
+                        Content="AddProp" />-->
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal"
+                        Margin="0,0,0,10">
+
+                <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
+                            Text="{Binding SolutionInject.Solution_Name,UpdateSourceTrigger=PropertyChanged}"
+                            hc:TitleElement.Title="Name:"
+                            hc:TitleElement.TitlePlacement="Left"
+                            hc:InfoElement.ShowClearButton="True"
+                            MinWidth="150" />
+
+                <CheckBox Command="{Binding NamePropCommand}"
+                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
+
+
+                <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
+                            Text="{Binding SolutionInject.Concentration,UpdateSourceTrigger=PropertyChanged}"
+                            hc:TitleElement.Title="Conc:"
+                            hc:TitleElement.TitlePlacement="Left"
+                            hc:InfoElement.ShowClearButton="True"
+                            MinWidth="150"
+                            Margin="10,0,0,0" />
+
+                <CheckBox Command="{Binding ConcPropCommand}"
+                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
+
+                <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
+                            Text="{Binding SolutionInject.Molecular_Weight,UpdateSourceTrigger=PropertyChanged}"
+                            hc:TitleElement.Title="MW:"
+                            hc:TitleElement.TitlePlacement="Left"
+                            hc:InfoElement.ShowClearButton="True"
+                            MinWidth="150"
+                            Margin="10,0,0,0" />
+                <CheckBox Command="{Binding MWPropCommand}"
+                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
+                
+                <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
+                            Text="{Binding SolutionInject.Info,UpdateSourceTrigger=PropertyChanged}"
+                            hc:TitleElement.Title="Info:"
+                            hc:TitleElement.TitlePlacement="Left"
+                            hc:InfoElement.ShowClearButton="True"
+                            MinWidth="150"
+                            Margin="10,0,0,0" />
+                <CheckBox Command="{Binding InfoPropCommand}"
+                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
+                
+                <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                        Content="Change"
+                        Margin="10,0,0,0" />
+            </StackPanel>
+
+        </UniformGrid>
 
         <reoGrid:ReoGridControl Grid.Row="99"
                                 x:Name="ReoGrid">
