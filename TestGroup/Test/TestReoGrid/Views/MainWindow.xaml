@@ -60,17 +60,20 @@
 
                 <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
                             Text="{Binding SolutionInject.Solution_Name,UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="{Binding Path=IsChecked,Converter={StaticResource Boolean2BooleanReConverter}, ElementName=NameCkb}"
                             hc:TitleElement.Title="Name:"
                             hc:TitleElement.TitlePlacement="Left"
                             hc:InfoElement.ShowClearButton="True"
                             MinWidth="150" />
 
                 <CheckBox Command="{Binding NamePropCommand}"
+                          x:Name="NameCkb"
                           CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
 
 
                 <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
                             Text="{Binding SolutionInject.Concentration,UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="{Binding Path=IsChecked,Converter={StaticResource Boolean2BooleanReConverter}, ElementName=ConcCkb}"
                             hc:TitleElement.Title="Conc:"
                             hc:TitleElement.TitlePlacement="Left"
                             hc:InfoElement.ShowClearButton="True"
@@ -78,27 +81,32 @@
                             Margin="10,0,0,0" />
 
                 <CheckBox Command="{Binding ConcPropCommand}"
-                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
+                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}"
+                          x:Name="ConcCkb"/>
 
                 <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
                             Text="{Binding SolutionInject.Molecular_Weight,UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="{Binding Path=IsChecked,Converter={StaticResource Boolean2BooleanReConverter}, ElementName=MWCkb}"
                             hc:TitleElement.Title="MW:"
                             hc:TitleElement.TitlePlacement="Left"
                             hc:InfoElement.ShowClearButton="True"
                             MinWidth="150"
                             Margin="10,0,0,0" />
                 <CheckBox Command="{Binding MWPropCommand}"
-                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
+                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" 
+                          x:Name="MWCkb"/>
                 
                 <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
                             Text="{Binding SolutionInject.Info,UpdateSourceTrigger=PropertyChanged}"
+                            IsEnabled="{Binding Path=IsChecked,Converter={StaticResource Boolean2BooleanReConverter}, ElementName=InfoCkb}"
                             hc:TitleElement.Title="Info:"
                             hc:TitleElement.TitlePlacement="Left"
                             hc:InfoElement.ShowClearButton="True"
                             MinWidth="150"
                             Margin="10,0,0,0" />
                 <CheckBox Command="{Binding InfoPropCommand}"
-                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
+                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}"
+                          x:Name="InfoCkb"/>
                 
                 <Button Style="{StaticResource ButtonDashedPrimary.Small}"
                         Content="Change"

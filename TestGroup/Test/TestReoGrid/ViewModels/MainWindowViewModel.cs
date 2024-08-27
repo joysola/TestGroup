@@ -39,6 +39,16 @@ namespace TestReoGrid
             Style = BorderLineStyle.Solid
         };
 
+        /// <summary>
+        /// Serial 命名Range集合
+        /// </summary>
+        public SerialRange Serial { get; set; }
+
+
+        private OperEnum _operStatus;
+
+
+        #region Properties
         [ObservableProperty]
         private PL_Exp_Dsgn_Inject _solutionInject = new()
         {
@@ -56,9 +66,6 @@ namespace TestReoGrid
 
         [ObservableProperty]
         private AutoColumnFilter _propFilter;
-
-        //[ObservableProperty]
-        //private ObservableCollection<string> _filterColumns = ["Conc.", "Mass Conc.", "Name", "Info", "MW"];
 
 
         [ObservableProperty]
@@ -80,14 +87,8 @@ namespace TestReoGrid
 
         [ObservableProperty]
         private NamedRange _propRange;
+        #endregion Properties
 
-        /// <summary>
-        /// Serial 命名Range集合
-        /// </summary>
-        public SerialRange Serial { get; set; }
-
-
-        private OperEnum _operStatus;
 
         #region Commands
         /// <summary>
@@ -136,9 +137,10 @@ namespace TestReoGrid
         }
 
         [RelayCommand]
-        private void Change()
+        private void Change(string propName)
         {
-            var xx = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues);
+            var spvs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues).ToList();
+
         }
 
         /// <summary>
@@ -175,6 +177,7 @@ namespace TestReoGrid
             //DataGenerateHelper.GetSerialData(Serial, Sheet);
         }
 
+        #region Prop Commands
         /// <summary>
         /// 删除某个属性
         /// </summary>
@@ -383,6 +386,8 @@ namespace TestReoGrid
                 DeleteProp(nameof(PL_Exp_Dsgn_Inject.Info));
             }
         }
+        #endregion Prop Commands
+
         #endregion Commands
 
 
