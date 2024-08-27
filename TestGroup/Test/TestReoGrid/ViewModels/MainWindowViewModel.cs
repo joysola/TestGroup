@@ -139,8 +139,16 @@ namespace TestReoGrid
         [RelayCommand]
         private void Change(string propName)
         {
-            var spvs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues).ToList();
-
+            // ???
+            if (propName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
+            {
+                var spvs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues)
+                     .Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)).ToList();
+                foreach (var spv in spvs)
+                {
+                    AutoCalcuate(spv.RowStart, spv.ColStart, spv.ParamName);
+                }
+            }
         }
 
         /// <summary>
@@ -228,7 +236,6 @@ namespace TestReoGrid
                         {
                             Sheet.DeleteRows(sp.RowStart, 1);
 
-                            SetMaxRows();
                             // 更新channel range
                             UpdateChRange(ch);
                         }
@@ -238,6 +245,7 @@ namespace TestReoGrid
                         }
                     }
                 }
+                SetMaxRows();
             }
             _operStatus = OperEnum.None;
         }
@@ -359,6 +367,7 @@ namespace TestReoGrid
             {
                 DeleteProp(nameof(PL_Exp_Dsgn_Inject.Concentration));
             }
+            AutoSP(nameof(PL_Exp_Dsgn_Inject.Concentration), isProp);
         }
 
         [RelayCommand]
@@ -372,6 +381,8 @@ namespace TestReoGrid
             {
                 DeleteProp(nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
             }
+            AutoSP(nameof(PL_Exp_Dsgn_Inject.Molecular_Weight), isProp);
+
         }
 
         [RelayCommand]
@@ -751,6 +762,39 @@ namespace TestReoGrid
 
 
         #region AutoCalculate
+        private void AutoSP(string paramName, bool isAdd)
+        {
+            if (paramName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
+            {
+                var sps = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList);
+                var autoSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                var pairSPs = sps.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)).ToList();
+
+
+                if (isAdd && autoSP is null)
+                {
+                    AddProp(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                }
+                else
+                {
+                    if (pairSPs.Count == 0)
+                    {
+                        DeleteProp(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                    }
+                    else
+                    {
+                        // 自动计算一下
+                        var spvs = pairSPs.SelectMany(x => x.ParamValues);
+                        foreach (var spv in spvs)
+                        {
+                            AutoCalcuate(spv.RowStart, spv.ColStart, spv.ParamName);
+                        }
+                    }
+                }
+            }
+        }
+
+
         private void AutoCalcuate(int row, int col, string paramName)
         {
             if (paramName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))

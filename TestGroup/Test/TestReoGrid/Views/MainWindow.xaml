@@ -23,9 +23,9 @@
                      Columns="1">
             <StackPanel Orientation="Horizontal"
                         Margin="0,0,0,10">
-                <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                <!--<Button Style="{StaticResource ButtonDashedPrimary.Small}"
                         Command="{Binding SetFilterCommand}"
-                        Content="Test" />
+                        Content="Test" />-->
                 <!--SelectedItem="{Binding SelectedFilterCol}"-->
                 <!--<hc:ComboBox Style="{StaticResource ComboBoxPlus.Small}"
                              hc:InfoElement.ShowClearButton="True"
@@ -64,7 +64,15 @@
                             hc:TitleElement.Title="Name:"
                             hc:TitleElement.TitlePlacement="Left"
                             hc:InfoElement.ShowClearButton="True"
-                            MinWidth="150" />
+                            MinWidth="150" >
+                    <i:Interaction.Triggers>
+                        <i:PropertyChangedTrigger Binding="{Binding SolutionInject.Solution_Name}">
+                            <i:InvokeCommandAction Command="{Binding ChangeCommand}"
+                                                   CommandParameter="Solution_Name" />
+                        </i:PropertyChangedTrigger>
+                    </i:Interaction.Triggers>
+                    </hc:TextBox>
+                            
 
                 <CheckBox Command="{Binding NamePropCommand}"
                           x:Name="NameCkb"
@@ -73,12 +81,20 @@
 
                 <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
                             Text="{Binding SolutionInject.Concentration,UpdateSourceTrigger=PropertyChanged}"
+                            
                             IsEnabled="{Binding Path=IsChecked,Converter={StaticResource Boolean2BooleanReConverter}, ElementName=ConcCkb}"
                             hc:TitleElement.Title="Conc:"
                             hc:TitleElement.TitlePlacement="Left"
                             hc:InfoElement.ShowClearButton="True"
                             MinWidth="150"
-                            Margin="10,0,0,0" />
+                            Margin="10,0,0,0">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{Binding ChangeCommand}"
+                                                   CommandParameter="Concentration" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </hc:TextBox>
 
                 <CheckBox Command="{Binding ConcPropCommand}"
                           CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}"
@@ -91,11 +107,19 @@
                             hc:TitleElement.TitlePlacement="Left"
                             hc:InfoElement.ShowClearButton="True"
                             MinWidth="150"
-                            Margin="10,0,0,0" />
+                            Margin="10,0,0,0">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{Binding ChangeCommand}"
+                                                   CommandParameter="Molecular_Weight" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </hc:TextBox>
+
                 <CheckBox Command="{Binding MWPropCommand}"
                           CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" 
                           x:Name="MWCkb"/>
-                
+
                 <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
                             Text="{Binding SolutionInject.Info,UpdateSourceTrigger=PropertyChanged}"
                             IsEnabled="{Binding Path=IsChecked,Converter={StaticResource Boolean2BooleanReConverter}, ElementName=InfoCkb}"
@@ -103,7 +127,16 @@
                             hc:TitleElement.TitlePlacement="Left"
                             hc:InfoElement.ShowClearButton="True"
                             MinWidth="150"
-                            Margin="10,0,0,0" />
+                            Margin="10,0,0,0">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{Binding ChangeCommand}"
+                                                   CommandParameter="Info" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </hc:TextBox>
+
+
                 <CheckBox Command="{Binding InfoPropCommand}"
                           CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}"
                           x:Name="InfoCkb"/>
