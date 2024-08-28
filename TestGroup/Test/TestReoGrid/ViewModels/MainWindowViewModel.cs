@@ -19,12 +19,15 @@ using TestReoGrid.Models.ReoGrid.Old;
 using unvell.ReoGrid;
 using unvell.ReoGrid.Data;
 using unvell.ReoGrid.DataFormat;
+using unvell.ReoGrid.Formula;
 using unvell.ReoGrid.Graphics;
 
 namespace TestReoGrid
 {
     public partial class MainWindowViewModel : ObservableRecipient
     {
+        private const string DilutionFormula = "Dilution_Formula";
+
         private Color _mainTextColor;
         private Color _dangerColor;
 
@@ -111,6 +114,7 @@ namespace TestReoGrid
             Freeze();
             // CreateRanges();
             //Data();
+            InitFormula();
 
             Serial = DataGenerateHelper.CreateNamedRanges(Sheet);
             InitSerial(Serial, Sheet);
@@ -586,7 +590,7 @@ namespace TestReoGrid
                 var validationResult = rule.Validate(spv.ParamValue, CultureInfo.CurrentCulture);
                 spv.HasError = !validationResult.IsValid;
 
-                SetDataFormat(spv);
+                //SetDataFormat(spv);
                 if (validationResult.IsValid)
                 {
                     //RestoreBorder(spv.RowStart, spv.ColStart);
@@ -1014,15 +1018,29 @@ namespace TestReoGrid
 
         #endregion AutoCalculate
 
+        #region Formula
 
-        private void SetDataFormat(SolutionParamValue spv)
+        private void InitFormula()
         {
-            var places = ReoSoluParamValueHelper.GetDecimalPlaces(spv.ParamName);
-            if (places > -1)
-            {
-                // Sheet.SetRangeDataFormat(spv.RowStart, spv.ColStart, spv.Rows, spv.Cols, CellDataFormatFlag.Custom, new DoubleDataFormt());
-            }
+            FormulaExtension.CustomFunctions[DilutionFormula] = Dilute;
         }
+
+        private object Dilute(Cell cell, object[] args)
+        {
+
+            return null;
+        } 
+
+        #endregion Formula
+
+        //private void SetDataFormat(SolutionParamValue spv)
+        //{
+        //    var places = ReoSoluParamValueHelper.GetDecimalPlaces(spv.ParamName);
+        //    if (places > -1)
+        //    {
+        //        // Sheet.SetRangeDataFormat(spv.RowStart, spv.ColStart, spv.Rows, spv.Cols, CellDataFormatFlag.Custom, new DoubleDataFormt());
+        //    }
+        //}
 
         private void RestoreDataFormat(int row, int col, int rows = 1, int cols = 1)
         {

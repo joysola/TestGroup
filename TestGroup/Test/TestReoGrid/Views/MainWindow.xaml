@@ -36,7 +36,7 @@
                              SelectedValue="{Binding SelectedFilterCol}"
                              MinWidth="100"
                              Margin="20,0,0,0" />-->
-                
+
                 <Button Style="{StaticResource ButtonDashedPrimary.Small}"
                         Margin="20,0,0,0"
                         Command="{Binding GetSerialDataCommand}"
@@ -53,6 +53,15 @@
                         Margin="20,0,0,0"
                         Command="{Binding AddPropCommand}"
                         Content="AddProp" />-->
+                <hc:NumericUpDown Style="{StaticResource NumericUpDownPlus.Small}"
+                                  hc:TitleElement.TitlePlacement="Left"
+                                  hc:TitleElement.Title="Dilute:"
+                                  MinWidth="150" 
+                                  Margin="10,0,0,0"/>
+
+                <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                        Content="Func"
+                        Margin="10,0,0,0" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal"
@@ -64,15 +73,15 @@
                             hc:TitleElement.Title="Name:"
                             hc:TitleElement.TitlePlacement="Left"
                             hc:InfoElement.ShowClearButton="True"
-                            MinWidth="150" >
+                            MinWidth="150">
                     <i:Interaction.Triggers>
                         <i:PropertyChangedTrigger Binding="{Binding SolutionInject.Solution_Name}">
                             <i:InvokeCommandAction Command="{Binding ChangeCommand}"
                                                    CommandParameter="Solution_Name" />
                         </i:PropertyChangedTrigger>
                     </i:Interaction.Triggers>
-                    </hc:TextBox>
-                            
+                </hc:TextBox>
+
 
                 <CheckBox Command="{Binding NamePropCommand}"
                           x:Name="NameCkb"
@@ -81,7 +90,6 @@
 
                 <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
                             Text="{Binding SolutionInject.Concentration,UpdateSourceTrigger=PropertyChanged}"
-                            
                             IsEnabled="{Binding Path=IsChecked,Converter={StaticResource Boolean2BooleanReConverter}, ElementName=ConcCkb}"
                             hc:TitleElement.Title="Conc:"
                             hc:TitleElement.TitlePlacement="Left"
@@ -98,7 +106,7 @@
 
                 <CheckBox Command="{Binding ConcPropCommand}"
                           CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}"
-                          x:Name="ConcCkb"/>
+                          x:Name="ConcCkb" />
 
                 <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
                             Text="{Binding SolutionInject.Molecular_Weight,UpdateSourceTrigger=PropertyChanged}"
@@ -117,8 +125,8 @@
                 </hc:TextBox>
 
                 <CheckBox Command="{Binding MWPropCommand}"
-                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" 
-                          x:Name="MWCkb"/>
+                          CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}"
+                          x:Name="MWCkb" />
 
                 <hc:TextBox Style="{StaticResource TextBoxPlus.Small}"
                             Text="{Binding SolutionInject.Info,UpdateSourceTrigger=PropertyChanged}"
@@ -139,8 +147,8 @@
 
                 <CheckBox Command="{Binding InfoPropCommand}"
                           CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}"
-                          x:Name="InfoCkb"/>
-                
+                          x:Name="InfoCkb" />
+
                 <Button Style="{StaticResource ButtonDashedPrimary.Small}"
                         Content="Change"
                         Margin="10,0,0,0" />
