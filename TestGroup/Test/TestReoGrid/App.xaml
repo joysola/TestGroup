@@ -15,7 +15,7 @@
             <Color x:Key="PL_DangerColor">#EA0000</Color>
             <SolidColorBrush x:Key="PL_DangerBrush"
                              Color="{StaticResource PL_DangerColor}" />
-            
+            <Color x:Key="PL_MainTextColor">#707070</Color>
 
             <hc:NoBlankTextRule x:Key="Name"
                                 ValidatesOnTargetUpdated="True" />

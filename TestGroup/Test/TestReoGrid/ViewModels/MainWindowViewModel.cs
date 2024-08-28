@@ -25,6 +25,9 @@ namespace TestReoGrid
 {
     public partial class MainWindowViewModel : ObservableRecipient
     {
+        private Color _mainTextColor;
+        private Color _dangerColor;
+
         private ToolTip _toolTip = new()
         {
             Foreground = (Brush)Application.Current.Resources["PL_DangerBrush"],
@@ -98,6 +101,9 @@ namespace TestReoGrid
         [RelayCommand]
         private void LoadReoGrid(ReoGridControl reoGrid)
         {
+            _dangerColor = (Color)Application.Current.Resources["PL_DangerColor"];
+            _mainTextColor = (Color)Application.Current.Resources["PL_MainTextColor"];
+
             ReoGrid = reoGrid;
             Sheet = reoGrid.CurrentWorksheet;
             InitSetting(reoGrid);
@@ -428,7 +434,8 @@ namespace TestReoGrid
                     var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
 
                     Serial.SolutionChannels.RemoveSoluParamValue(row, col);
-                    RestoreBorder(cell.Row, cell.Column);
+                    //RestoreBorder(cell.Row, cell.Column);
+                    RestoreCell(cell.Row, cell.Column);
                     RestoreDataFormat(cell.Row, cell.Column);
 
                     AutoCalcuate(row, col, spv.ParamName);
@@ -531,7 +538,9 @@ namespace TestReoGrid
                 var sp = Serial.SolutionChannels.FindSoluParam(row, col);
                 var oldSpv = sp.FindSoluParamValue(row, col);
                 sp?.ParamValues?.Remove(oldSpv); // 目标位置已经有值，则先删除
-                RestoreBorder(cell.Row, cell.Column);
+                                                 //RestoreBorder(cell.Row, cell.Column);
+                RestoreCell(cell.Row, cell.Column);
+
                 RestoreDataFormat(cell.Row, cell.Column);
 
                 if (sp is not null)
@@ -566,7 +575,9 @@ namespace TestReoGrid
                         var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
 
                         Serial.SolutionChannels.RemoveSoluParamValue(row, col);
-                        RestoreBorder(cell.Row, cell.Column);
+                        //RestoreBorder(cell.Row, cell.Column);
+                        RestoreCell(cell.Row, cell.Column);
+
                         RestoreDataFormat(cell.Row, cell.Column);
 
                         AutoCalcuate(row, col, spv.ParamName);
@@ -580,7 +591,9 @@ namespace TestReoGrid
                         var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
 
                         Serial.SolutionChannels.RemoveSoluParamValue(row, col);
-                        RestoreBorder(cell.Row, cell.Column);
+                        //RestoreBorder(cell.Row, cell.Column);
+                        RestoreCell(cell.Row, cell.Column);
+
                         RestoreDataFormat(cell.Row, cell.Column);
                         AutoCalcuate(row, col, spv.ParamName);
 
@@ -700,11 +713,13 @@ namespace TestReoGrid
                 SetDataFormat(spv);
                 if (validationResult.IsValid)
                 {
-                    RestoreBorder(spv.RowStart, spv.ColStart);
+                    //RestoreBorder(spv.RowStart, spv.ColStart);
+                    RestoreCell(spv.RowStart, spv.ColStart);
                 }
                 else
                 {
-                    SetDangerBorder(spv.RowStart, spv.ColStart);
+                    //SetDangerBorder(spv.RowStart, spv.ColStart);
+                    SetDangerCell(spv.RowStart, spv.ColStart);
                 }
             }
         }
@@ -719,6 +734,23 @@ namespace TestReoGrid
             Sheet.RemoveRangeBorders(new RangePosition(row, col, rows, cols), BorderPositions.Outside);
         }
 
+        public void SetDangerCell(int row, int col, int rows = 1, int cols = 1)
+        {
+            var cell = Sheet.GetCell(row, col);
+            if (cell is not null)
+            {
+                cell.Style.TextColor = _dangerColor.ToReoColor();
+            }
+        }
+
+        public void RestoreCell(int row, int col, int rows = 1, int cols = 1)
+        {
+            var cell = Sheet.GetCell(row, col);
+            if (cell is not null)
+            {
+                cell.Style.TextColor = SolidColor.Black; //_mainTextColor.ToReoColor();
+            }
+        }
 
 
         #region CellEvents
@@ -767,21 +799,34 @@ namespace TestReoGrid
             if (paramName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
             {
                 var sps = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList);
-                var autoSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                var autoSPs = sps.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration)).ToList();
                 var pairSPs = sps.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)).ToList();
 
 
-                if (isAdd && autoSP is null)
+                if (isAdd && autoSPs.Count == 0)
                 {
                     AddProp(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                    autoSPs = sps.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration)).ToList();
+                    foreach (var asp in autoSPs)
+                    {
+                        var newRange = Sheet.DefineNamedRange($"{asp.RowStart}@{asp.ParamName}", asp.RowStart, asp.ColStart, 1, Sheet.ColumnCount);
+                        if (newRange is not null)
+                        {
+                            newRange.IsReadonly = true;
+                        }
+                    }
                 }
                 else
                 {
                     if (pairSPs.Count == 0)
                     {
                         DeleteProp(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+                        foreach (var asp in autoSPs)
+                        {
+                            Sheet.UndefineNamedRange($"{asp.RowStart}@{asp.ParamName}");
+                        }
                     }
-                    else
+                    else // 存在conc或mw时
                     {
                         // 自动计算一下
                         var spvs = pairSPs.SelectMany(x => x.ParamValues);
@@ -802,7 +847,8 @@ namespace TestReoGrid
                 var ch = Serial.SolutionChannels.FindSolutionChannel(row, col);
                 var sps = ch.SolutionParamList;
                 var autoSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
-
+                var concSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
+                var mwSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
 
                 var colSPVs = sps.SelectMany(x => x.ParamValues).Where(x => x.ColStart == col).ToList();
 
@@ -810,7 +856,8 @@ namespace TestReoGrid
                 if (autoSpv is null)
                 {
                     autoSpv = CreateSPV(autoSP.RowStart, col, autoSP.ParamName, null);
-                    Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
+                    var autoCell = Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
+                    //autoCell.IsReadOnly = true;
                 }
 
                 var concSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
@@ -820,8 +867,14 @@ namespace TestReoGrid
 
                 if (autoSpv is not null)
                 {
-                    var conc = SolutionInject.Concentration;
-                    var mw = SolutionInject.Molecular_Weight;
+                    double? conc = null;
+                    int? mw = null;
+
+                    if (!(concSP is not null && mwSP is not null)) // 只存在一个conc或mw时，需要继承部分数据
+                    {
+                        conc = SolutionInject.Concentration;
+                        mw = SolutionInject.Molecular_Weight;
+                    }
 
                     var concStr = concSpv?.ParamValue;
                     if (concStr is not null && double.TryParse(concStr, out double paramConc))
@@ -840,11 +893,11 @@ namespace TestReoGrid
                     {
 
                         autoSpv.ParamValue = null;
-
                     }
                     else
                     {
-                        autoSpv.ParamValue = $"{MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType)}";
+                        var value = MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType);
+                        autoSpv.ParamValue = value.HasValue ? $"{value}" : null;
                     }
 
                     Sheet.SetCellData(autoSpv.RowStart, autoSpv.ColStart, autoSpv.ParamValue);
@@ -928,7 +981,7 @@ namespace TestReoGrid
 
             var sheet = reoGrid.CurrentWorksheet;
             sheet.Name = "Serial";
-
+            
             //DataFormatterManager.Instance.DataFormatters.Add(CellDataFormatFlag.Custom, new DoubleDataFormt());
         }
 
