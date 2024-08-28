@@ -26,7 +26,7 @@ namespace TestReoGrid
 {
     public partial class MainWindowViewModel : ObservableRecipient
     {
-        private const string DilutionFormula = "Dilution_Formula";
+        private const string DilutionFormula = "Dilute";
 
         private Color _mainTextColor;
         private Color _dangerColor;
@@ -88,11 +88,13 @@ namespace TestReoGrid
         private string _selectedFilterCol;
 
         [ObservableProperty]
-        private NamedRange _channelsRange;
+        private int _dilutionRatio = 1;
+        //[ObservableProperty]
+        //private NamedRange _channelsRange;
 
 
-        [ObservableProperty]
-        private NamedRange _propRange;
+        //[ObservableProperty]
+        //private NamedRange _propRange;
         #endregion Properties
 
 
@@ -146,20 +148,8 @@ namespace TestReoGrid
             //Sheet.RowsDeleted += Sheet_RowsDeleted;
         }
 
-        [RelayCommand]
-        private void Change(string propName)
-        {
-            // ???
-            if (propName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
-            {
-                var spvs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues)
-                     .Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)).ToList();
-                foreach (var spv in spvs)
-                {
-                    AutoCalcuate(spv.RowStart, spv.ColStart, spv.ParamName);
-                }
-            }
-        }
+
+
 
         /// <summary>
         /// WPF 没有相应的界面
@@ -195,7 +185,37 @@ namespace TestReoGrid
             //DataGenerateHelper.GetSerialData(Serial, Sheet);
         }
 
+        [RelayCommand]
+        private void Dilute()
+        {
+            var selectedRange = Sheet.SelectionRange;
+            if (selectedRange.IsSingleCell)
+            {
+                // target
+                // 稀释
+                var cell = Sheet.CreateAndGetCell(selectedRange.Row, selectedRange.Col);
+             
+                cell.Formula = $"{DilutionFormula}({DilutionRatio})";
+            }
+
+        }
+
+
         #region Prop Commands
+
+        [RelayCommand]
+        private void Change(string propName)
+        {
+            if (propName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
+            {
+                var spvs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues)
+                     .Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)).ToList();
+                foreach (var spv in spvs)
+                {
+                    AutoCalcuate(spv.RowStart, spv.ColStart, spv.ParamName);
+                }
+            }
+        }
         /// <summary>
         /// 删除某个属性
         /// </summary>
@@ -1027,9 +1047,12 @@ namespace TestReoGrid
 
         private object Dilute(Cell cell, object[] args)
         {
-
+            if (args is [double ratio] && cell.Data is double conc)
+            {
+                return conc / ratio;
+            }
             return null;
-        } 
+        }
 
         #endregion Formula
 

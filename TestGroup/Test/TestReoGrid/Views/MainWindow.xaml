@@ -54,13 +54,18 @@
                         Command="{Binding AddPropCommand}"
                         Content="AddProp" />-->
                 <hc:NumericUpDown Style="{StaticResource NumericUpDownPlus.Small}"
+                                  Value="{Binding DilutionRatio,UpdateSourceTrigger=PropertyChanged}"
                                   hc:TitleElement.TitlePlacement="Left"
                                   hc:TitleElement.Title="Dilute:"
-                                  MinWidth="150" 
-                                  Margin="10,0,0,0"/>
+                                  Increment="1"
+                                  Minimum="1"
+                                  DecimalPlaces="0"
+                                  MinWidth="150"
+                                  Margin="10,0,0,0" />
 
                 <Button Style="{StaticResource ButtonDashedPrimary.Small}"
-                        Content="Func"
+                        Command="{Binding DiluteCommand}"
+                        Content="Dilute"
                         Margin="10,0,0,0" />
             </StackPanel>
 
@@ -75,10 +80,16 @@
                             hc:InfoElement.ShowClearButton="True"
                             MinWidth="150">
                     <i:Interaction.Triggers>
-                        <i:PropertyChangedTrigger Binding="{Binding SolutionInject.Solution_Name}">
+                        <!--<i:PropertyChangedTrigger Binding="{Binding SolutionInject.Solution_Name}">
                             <i:InvokeCommandAction Command="{Binding ChangeCommand}"
                                                    CommandParameter="Solution_Name" />
-                        </i:PropertyChangedTrigger>
+                        </i:PropertyChangedTrigger>-->
+
+                        <i:EventTrigger EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{Binding ChangeCommand}"
+                                                   CommandParameter="Solution_Name" />
+                        </i:EventTrigger>
+
                     </i:Interaction.Triggers>
                 </hc:TextBox>
 
