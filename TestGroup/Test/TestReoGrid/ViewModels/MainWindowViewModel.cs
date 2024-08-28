@@ -55,7 +55,7 @@ namespace TestReoGrid
         [ObservableProperty]
         private PL_Exp_Dsgn_Inject _solutionInject = new()
         {
-            Concentration = 1.0,
+            Concentration = 5.0,
             Molecular_Weight = 100,
             UnitType = UnitTypeEnum.Mole,
         };
@@ -624,7 +624,14 @@ namespace TestReoGrid
             var cell = Sheet.GetCell(row, col);
             if (cell is not null)
             {
-                cell.Style.TextColor = SolidColor.Black; //_mainTextColor.ToReoColor();
+                if (IsAutoSPV(row, col))
+                {
+                    cell.Style.TextColor = _mainTextColor.ToReoColor();
+                }
+                else
+                {
+                    cell.Style.TextColor = SolidColor.Black;
+                }
             }
         }
 
@@ -684,7 +691,6 @@ namespace TestReoGrid
                 var autoSPs = sps.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration)).ToList();
                 var pairSPs = sps.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)).ToList();
 
-
                 if (isAdd && autoSPs.Count == 0)
                 {
                     AddAutoSP();
@@ -714,65 +720,75 @@ namespace TestReoGrid
         {
             if (paramName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
             {
-                var ch = Serial.SolutionChannels.FindSolutionChannel(row, col);
-                var sps = ch.SolutionParamList;
-                var autoSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
-                var concSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
-                var mwSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+                AutoCalcuateCore(row, col);
+            }
+        }
 
-                var colSPVs = sps.SelectMany(x => x.ParamValues).Where(x => x.ColStart == col).ToList();
+        /// <summary>
+        /// 自动计算核心
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        private void AutoCalcuateCore(int row, int col)
+        {
+            var ch = Serial.SolutionChannels.FindSolutionChannel(row, col);
+            var sps = ch.SolutionParamList;
+            var autoSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+            var concSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
+            var mwSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
 
-                var autoSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
-                if (autoSpv is null)
+            var colSPVs = sps.SelectMany(x => x.ParamValues).Where(x => x.ColStart == col).ToList();
+
+            var autoSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+            if (autoSpv is null)
+            {
+                autoSpv = CreateSPV(autoSP.RowStart, col, autoSP.ParamName, null);
+                var autoCell = Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
+                //autoCell.IsReadOnly = true;
+            }
+
+            var concSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
+            var mwSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+
+            if (autoSpv is not null)
+            {
+                double? conc = null;
+                int? mw = null;
+
+                if (!(concSP is not null && mwSP is not null)) // 只存在一个conc或mw时，需要继承部分数据
                 {
-                    autoSpv = CreateSPV(autoSP.RowStart, col, autoSP.ParamName, null);
-                    var autoCell = Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
-                    //autoCell.IsReadOnly = true;
+                    conc = SolutionInject.Concentration;
+                    mw = SolutionInject.Molecular_Weight;
                 }
 
-                var concSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
-                var mwSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
-
-
-
-                if (autoSpv is not null)
+                var concStr = concSpv?.ParamValue;
+                if (concStr is not null && double.TryParse(concStr, out double paramConc))
                 {
-                    double? conc = null;
-                    int? mw = null;
-
-                    if (!(concSP is not null && mwSP is not null)) // 只存在一个conc或mw时，需要继承部分数据
-                    {
-                        conc = SolutionInject.Concentration;
-                        mw = SolutionInject.Molecular_Weight;
-                    }
-
-                    var concStr = concSpv?.ParamValue;
-                    if (concStr is not null && double.TryParse(concStr, out double paramConc))
-                    {
-                        conc = paramConc;
-                    }
-
-                    var mwStr = mwSpv?.ParamValue;
-                    if (mwStr is not null && int.TryParse(mwStr, out int paramMW))
-                    {
-                        mw = paramMW;
-                    }
-
-                    if ((concSpv is not null && string.IsNullOrWhiteSpace(concStr)) ||
-                        (mwSpv is not null && string.IsNullOrWhiteSpace(mwStr)))
-                    {
-
-                        autoSpv.ParamValue = null;
-                    }
-                    else
-                    {
-                        var value = MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType);
-                        autoSpv.ParamValue = value.HasValue ? $"{value}" : null;
-                    }
-
-                    Sheet.SetCellData(autoSpv.RowStart, autoSpv.ColStart, autoSpv.ParamValue);
+                    conc = paramConc;
                 }
 
+                var mwStr = mwSpv?.ParamValue;
+                if (mwStr is not null && int.TryParse(mwStr, out int paramMW))
+                {
+                    mw = paramMW;
+                }
+
+                if ((concSpv is not null && string.IsNullOrWhiteSpace(concStr)) ||
+                    (mwSpv is not null && string.IsNullOrWhiteSpace(mwStr)))
+                {
+
+                    autoSpv.ParamValue = null;
+                }
+                else
+                {
+                    var value = MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType);
+                    autoSpv.ParamValue = value.HasValue ? $"{value}" : null;
+                }
+
+                var cell = Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
+                cell.Style.TextColor = _mainTextColor.ToReoColor();
+                cell.Data = autoSpv.ParamValue;
+                //Sheet.SetCellData(autoSpv.RowStart, autoSpv.ColStart, autoSpv.ParamValue);
             }
         }
 
@@ -784,6 +800,17 @@ namespace TestReoGrid
         {
             var autoSPs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration)).ToList();
             return autoSPs.Count > 0;
+        }
+
+        private bool IsAutoSPV(int row, int column)
+        {
+            var result = false;
+            var spv = Serial.SolutionChannels.FindSoluParamValue(row, column);
+            if (spv is not null)
+            {
+                result = spv.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration);
+            }
+            return result;
         }
 
         /// <summary>
@@ -817,10 +844,22 @@ namespace TestReoGrid
                 var autoSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
                 if (autoSP is not null)
                 {
+
+                    var cell = Sheet.GetCell(autoSP.RowStart, autoSP.ColStart);
+                    if (cell != null)
+                        cell.Style.TextColor = _mainTextColor.ToReoColor();
+
                     var newRange = Sheet.DefineNamedRange($"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}", autoSP.RowStart, autoSP.ColStart, 1, Sheet.ColumnCount);
                     if (newRange is not null)
                     {
                         newRange.IsReadonly = true;
+                    }
+                    // 重新触发自动计算
+                    var pairSPs = ch.SolutionParamList.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+                    var pairSPVs = pairSPs.SelectMany(x => x.ParamValues);
+                    foreach (var spv in pairSPVs)
+                    {
+                        AutoCalcuate(spv.RowStart, spv.ColStart, spv.ParamName);
                     }
                 }
             }
