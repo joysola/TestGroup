@@ -27,6 +27,10 @@ namespace TestReoGrid
     public partial class MainWindowViewModel : ObservableRecipient
     {
         private const string DilutionFormula = "Dilute";
+        /// <summary>
+        /// 小数位数
+        /// </summary>
+        private const int Digital = 6;
 
         private Color _mainTextColor;
         private Color _dangerColor;
@@ -88,7 +92,7 @@ namespace TestReoGrid
         private string _selectedFilterCol;
 
         [ObservableProperty]
-        private int _dilutionRatio = 1;
+        private double _dilutionRatio = 2;
         //[ObservableProperty]
         //private NamedRange _channelsRange;
 
@@ -185,21 +189,56 @@ namespace TestReoGrid
             //DataGenerateHelper.GetSerialData(Serial, Sheet);
         }
 
+
         [RelayCommand]
-        private void Dilute()
+        private void Dilute(double dilutionRatio)
         {
-            var selectedRange = Sheet.SelectionRange;
-            if (selectedRange.IsSingleCell)
+            _operStatus = OperEnum.Dilute;
+            var selRange = Sheet.SelectionRange;
+            // serial时的处理
+            if (selRange.Cols > 1 && selRange.Rows == 1)
             {
-                // target
-                // 稀释
-                var cell = Sheet.CreateAndGetCell(selectedRange.Row, selectedRange.Col);
-             
-                cell.Formula = $"{DilutionFormula}({DilutionRatio})";
+                var row = selRange.Row;
+                var col_End = selRange.EndCol;
+                var col_start = selRange.Col;
+
+                var dataCell = Sheet.GetCell(row, col_End); // 找最后一个
+                var sp = Serial.SolutionChannels.FindSoluParam(row, col_End);
+                var spv = sp.FindSoluParamValue(row, col_End);
+                if (dataCell is not null &&
+                    spv is not null &&
+                    spv.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) &&
+                    !spv.HasError &&
+                    double.TryParse(spv.ParamValue, out var conc))
+                {
+
+                    var currentConc = conc;
+                    for (int i = col_End - 1; i >= col_start; i--)
+                    {
+                        currentConc = Math.Round(currentConc / dilutionRatio, Digital, MidpointRounding.AwayFromZero);
+
+                        var newSPV = sp.FindSoluParamValue(row, i);
+                        if (newSPV is null)
+                        {
+                            newSPV = CreateSPV(row, i, sp.ParamName, currentConc);
+                        }
+                        else
+                        {
+                            newSPV.ParamValue = $"{currentConc}";
+                        }
+                        sp.ParamValues.Add(newSPV);
+
+                        // 稀释后进行自动计算
+                        AutoCalcuate(newSPV.RowStart, newSPV.ColStart, newSPV.ParamName);
+                        Sheet.SetCellData(row, i, currentConc);
+                    }
+                }
             }
-
+            _operStatus = OperEnum.None;
         }
-
+        // 稀释
+        //var cell = Sheet.CreateAndGetCell(selectedRange.Row, selectedRange.Col);
+        //cell.Formula = $"{DilutionFormula}({DilutionRatio})";
 
         #region Prop Commands
 
@@ -223,7 +262,9 @@ namespace TestReoGrid
         private void DeleteProp(string selectedFilterCol)
         {
             _operStatus = OperEnum.DeleteRow;
+            UndefineAutoRange(); // 解除定义，防止删除丢失范围
             DeletePropCore(selectedFilterCol);
+            DefineAutoRange(); // 恢复定义
             _operStatus = OperEnum.None;
         }
 
@@ -767,7 +808,8 @@ namespace TestReoGrid
             if (autoSpv is null)
             {
                 autoSpv = CreateSPV(autoSP.RowStart, col, autoSP.ParamName, null);
-                var autoCell = Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
+                autoSP.ParamValues.Add(autoSpv);
+                //var autoCell = Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
                 //autoCell.IsReadOnly = true;
             }
 
@@ -806,7 +848,7 @@ namespace TestReoGrid
                 else
                 {
                     var value = MassMoleUnitHelper.GetMoleMassConc(conc, mw, SolutionInject?.UnitType);
-                    autoSpv.ParamValue = value.HasValue ? $"{value}" : null;
+                    autoSpv.ParamValue = value.HasValue ? $"{Math.Round(value.Value, Digital, MidpointRounding.AwayFromZero)}" : null;
                 }
 
                 var cell = Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
@@ -844,24 +886,61 @@ namespace TestReoGrid
         private void DeleteAutoSP()
         {
             // 1. 
+            UndefineAutoRange();
+            // 2.
+            DeletePropCore(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+        }
+        /// <summary>
+        /// 解除定义autoRange
+        /// </summary>
+        private void UndefineAutoRange()
+        {
             foreach (var ch in Serial.SolutionChannels)
             {
                 var autoSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
 
                 if (autoSP is not null)
                 {
-                    Sheet.UndefineNamedRange($"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}");
+                    var rangeName = $"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}";
+                    var range = Sheet.GetNamedRange(rangeName);
+                    if (range is not null)
+                    {
+                        range.Style.TextColor = SolidColor.Black;
+                        range.IsReadonly = false;
+                    }
+                    var xx = Sheet.UndefineNamedRange(rangeName);
                 }
             }
-            // 2.
-            DeletePropCore(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
         }
+
+        /// <summary>
+        /// 定义autorange
+        /// </summary>
+        private void DefineAutoRange()
+        {
+            foreach (var ch in Serial.SolutionChannels)
+            {
+                var autoSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+
+                if (autoSP is not null)
+                {
+                    var newRange = Sheet.DefineNamedRange($"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}", autoSP.RowStart, autoSP.ColStart, 1, Sheet.ColumnCount);
+                    if (newRange is not null)
+                    {
+                        newRange.Style.TextColor = _mainTextColor.ToReoColor();
+                        newRange.IsReadonly = true;
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// 新增自动计算sp
         /// </summary>
         private void AddAutoSP()
         {
+            // 1. 
             AddPropCore(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
             foreach (var ch in Serial.SolutionChannels)
             {
@@ -873,11 +952,11 @@ namespace TestReoGrid
                     if (cell != null)
                         cell.Style.TextColor = _mainTextColor.ToReoColor();
 
-                    var newRange = Sheet.DefineNamedRange($"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}", autoSP.RowStart, autoSP.ColStart, 1, Sheet.ColumnCount);
-                    if (newRange is not null)
-                    {
-                        newRange.IsReadonly = true;
-                    }
+                    //var newRange = Sheet.DefineNamedRange($"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}", autoSP.RowStart, autoSP.ColStart, 1, Sheet.ColumnCount);
+                    //if (newRange is not null)
+                    //{
+                    //    newRange.IsReadonly = true;
+                    //}
                     // 重新触发自动计算
                     var pairSPs = ch.SolutionParamList.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
                     var pairSPVs = pairSPs.SelectMany(x => x.ParamValues);
@@ -887,6 +966,8 @@ namespace TestReoGrid
                     }
                 }
             }
+            // 2. 
+            DefineAutoRange();
         }
 
 
@@ -990,8 +1071,16 @@ namespace TestReoGrid
                         // 删除完sp后，讲prop置空即可
                         if (ch.SolutionParamList.Count == 0)
                         {
-                            var cell = Sheet.GetCell(sp.RowStart, sp.ColStart);
-                            cell.Data = null;
+                            Sheet.SetCellData(sp.RowStart, sp.ColStart, null);
+                            // 清空值
+                            foreach (var spv in sp.ParamValues)
+                            {
+                                var cell = Sheet.GetCell(spv.RowStart, spv.ColStart);
+                                if (cell is not null)
+                                {
+                                    cell.Data = null;
+                                }
+                            }
                         }
                         else
                         {

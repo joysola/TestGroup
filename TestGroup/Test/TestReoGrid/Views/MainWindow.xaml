@@ -61,10 +61,13 @@
                                   Minimum="1"
                                   DecimalPlaces="0"
                                   MinWidth="150"
+                                  x:Name="RaitoNud"
                                   Margin="10,0,0,0" />
 
+                        <!--CommandParameter="{Binding DilutionRatio}"-->
                 <Button Style="{StaticResource ButtonDashedPrimary.Small}"
                         Command="{Binding DiluteCommand}"
+                        CommandParameter="{Binding Path=Value, ElementName=RaitoNud}"
                         Content="Dilute"
                         Margin="10,0,0,0" />
             </StackPanel>

@@ -16,5 +16,6 @@ namespace TestReoGrid.Models.Enums
         InsertRow,
         DeleteRow,
         Auto,
+        Dilute,
     }
 }
