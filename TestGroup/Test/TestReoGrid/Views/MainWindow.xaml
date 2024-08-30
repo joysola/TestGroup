@@ -37,11 +37,6 @@
                              MinWidth="100"
                              Margin="20,0,0,0" />-->
 
-                <Button Style="{StaticResource ButtonDashedPrimary.Small}"
-                        Margin="20,0,0,0"
-                        Command="{Binding GetSerialDataCommand}"
-                        CommandParameter="{Binding SelectedFilterCol}"
-                        Content="GetSerialData" />
 
                 <!--<Button Style="{StaticResource ButtonDashedPrimary.Small}"
                         Margin="20,0,0,0"
@@ -62,7 +57,7 @@
                                   DecimalPlaces="0"
                                   MinWidth="150"
                                   x:Name="RaitoNud"
-                                  Margin="10,0,0,0" />
+                                  Margin="0,0,0,0" />
 
                         <!--CommandParameter="{Binding DilutionRatio}"-->
                 <Button Style="{StaticResource ButtonDashedPrimary.Small}"
@@ -70,6 +65,13 @@
                         CommandParameter="{Binding Path=Value, ElementName=RaitoNud}"
                         Content="Dilute"
                         Margin="10,0,0,0" />
+
+
+                <Button Style="{StaticResource ButtonDashedPrimary.Small}"
+                        Margin="20,0,0,0"
+                        Command="{Binding GetSerialDataCommand}"
+                        CommandParameter="{Binding SelectedFilterCol}"
+                        Content="GetSerialData" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal"
@@ -162,10 +164,6 @@
                 <CheckBox Command="{Binding InfoPropCommand}"
                           CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}"
                           x:Name="InfoCkb" />
-
-                <Button Style="{StaticResource ButtonDashedPrimary.Small}"
-                        Content="Change"
-                        Margin="10,0,0,0" />
             </StackPanel>
 
         </UniformGrid>

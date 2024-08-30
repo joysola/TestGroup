@@ -32,7 +32,7 @@ namespace TestReoGrid
         /// <summary>
         /// 小数位数
         /// </summary>
-        private const int Digital = 6;
+        private const int Digital = 3;
 
         private Color _mainTextColor;
         private Color _dangerColor;
@@ -236,12 +236,12 @@ namespace TestReoGrid
                         if (newSPV is null)
                         {
                             newSPV = CreateSPV(row, i, sp.ParamName, currentConc);
+                            sp.ParamValues.Add(newSPV); // 新增则加入集合
                         }
                         else
                         {
                             newSPV.ParamValue = $"{currentConc}";
                         }
-                        sp.ParamValues.Add(newSPV);
 
                         // 稀释后进行自动计算
                         AutoCalcuate(newSPV.RowStart, newSPV.ColStart, newSPV.ParamName);
