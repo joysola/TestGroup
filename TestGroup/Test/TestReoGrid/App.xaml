@@ -11,27 +11,32 @@
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <Color x:Key="PL_DangerColor">#EA0000</Color>
-            <SolidColorBrush x:Key="PL_DangerBrush"
-                             Color="{StaticResource PL_DangerColor}" />
+            <Color x:Key="PL_WarningColor">#FF7000</Color>
             <Color x:Key="PL_MainTextColor">#707070</Color>
 
+            <Color x:Key="PL_DangerColor">#EA0000</Color>
+            <Color x:Key="PL_LightDangerColor">#ffeaea</Color>
+            
+            <SolidColorBrush x:Key="PL_DangerBrush"
+                             Color="{StaticResource PL_DangerColor}" />
+            
             <hc:NoBlankTextRule x:Key="Name"
+                                ErrorContent="Can't be null."
                                 ValidatesOnTargetUpdated="True" />
             
             <hc:NoBlankTextRule x:Key="Info"
+                                ErrorContent="Can't be null."
                                 ValidatesOnTargetUpdated="True" />
             
             <plf:NumericUpDownRule x:Key="MW"
-                                   CanbeNull="True"
+                                   CanbeNull="False"
                                    HasDecimal="False"
                                    MinValue="0"
                                    MaxValue="9999999"
                                    ValidatesOnTargetUpdated="True" />
             
             <plf:NumericUpDownRule x:Key="Conc"
-                                   CanbeNull="True"
+                                   CanbeNull="False"
                                    MinValue="0"
                                    MaxValue="99999"
                                    ValidatesOnTargetUpdated="True" />

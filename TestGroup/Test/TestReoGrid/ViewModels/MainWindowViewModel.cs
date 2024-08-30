@@ -36,6 +36,7 @@ namespace TestReoGrid
 
         private Color _mainTextColor;
         private Color _dangerColor;
+        private Color _lightDangerColor;
 
         private ToolTip _toolTip = new()
         {
@@ -114,6 +115,7 @@ namespace TestReoGrid
         {
             _dangerColor = (Color)Application.Current.Resources["PL_DangerColor"];
             _mainTextColor = (Color)Application.Current.Resources["PL_MainTextColor"];
+            _lightDangerColor = (Color)Application.Current.Resources["PL_LightDangerColor"];
 
             ReoGrid = reoGrid;
             Sheet = reoGrid.CurrentWorksheet;
@@ -199,8 +201,17 @@ namespace TestReoGrid
         {
             // 结束编辑
             Sheet.EndEdit(EndEditReason.NormalFinish);
+            Check(); // 检查数据
             var xx = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
             var yy = xx.SelectMany(x => x.ParamValues).ToList();
+            if (yy.Exists(x => x.HasError))
+            {
+                MessageBox.Show("Error！");
+            }
+            else
+            {
+                MessageBox.Show("Success！");
+            }
             //DataGenerateHelper.GetSerialData(Serial, Sheet);
         }
 
@@ -245,8 +256,11 @@ namespace TestReoGrid
 
                         // 稀释后进行自动计算
                         AutoCalcuate(newSPV.RowStart, newSPV.ColStart, newSPV.ParamName);
+                        var cell = Sheet.CreateAndGetCell(row, i);
+                        cell.Data = currentConc;
+                        Validate(newSPV);
                         //ReoGrid.DoAction(new SetCellDataAction(row, i, currentConc));
-                        Sheet.SetCellData(row, i, currentConc);
+                        //Sheet.SetCellData(row, i, currentConc);
                     }
                 }
             }
@@ -681,22 +695,26 @@ namespace TestReoGrid
             }
         }
 
-        public void SetDangerBorder(int row, int col, int rows = 1, int cols = 1)
-        {
-            Sheet.SetRangeBorders(row, col, rows, cols, BorderPositions.Outside, _dangerRangeBdStyle);
-        }
+        //public void SetDangerBorder(int row, int col, int rows = 1, int cols = 1)
+        //{
+        //    Sheet.SetRangeBorders(row, col, rows, cols, BorderPositions.Outside, _dangerRangeBdStyle);
+        //}
 
-        public void RestoreBorder(int row, int col, int rows = 1, int cols = 1)
-        {
-            Sheet.RemoveRangeBorders(new RangePosition(row, col, rows, cols), BorderPositions.Outside);
-        }
+        //public void RestoreBorder(int row, int col, int rows = 1, int cols = 1)
+        //{
+        //    Sheet.RemoveRangeBorders(new RangePosition(row, col, rows, cols), BorderPositions.Outside);
+        //}
 
         public void SetDangerCell(int row, int col, int rows = 1, int cols = 1)
         {
-            var cell = Sheet.GetCell(row, col);
+            var cell = Sheet.CreateAndGetCell(row, col);
             if (cell is not null)
             {
                 cell.Style.TextColor = _dangerColor.ToReoColor();
+                if (cell.Data is null)
+                {
+                    SetNullDanger(row, col);
+                }
             }
         }
 
@@ -713,6 +731,7 @@ namespace TestReoGrid
                 {
                     cell.Style.TextColor = SolidColor.Black;
                 }
+                cell.Style.BackColor = SolidColor.Transparent;
             }
         }
 
@@ -898,6 +917,9 @@ namespace TestReoGrid
             }
             return result;
         }
+
+        private bool IsAuto(string propName) => propName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration);
+
 
         /// <summary>
         /// 删除自动计算的sp
@@ -1095,11 +1117,14 @@ namespace TestReoGrid
                             // 清空值
                             foreach (var spv in sp.ParamValues)
                             {
+                                //spv.ParamValue = null;
                                 var cell = Sheet.GetCell(spv.RowStart, spv.ColStart);
                                 if (cell is not null)
                                 {
                                     //ReoGrid.DoAction(new SetCellDataAction(spv.RowStart, spv.ColStart, null));
                                     cell.Data = null;
+                                    //Validate(spv);
+                                    RestoreNullDanger(cell.Row, cell.Column); // 恢复
                                 }
                             }
                         }
@@ -1166,21 +1191,63 @@ namespace TestReoGrid
 
         #endregion Formula
 
-        //private void SetDataFormat(SolutionParamValue spv)
-        //{
-        //    var places = ReoSoluParamValueHelper.GetDecimalPlaces(spv.ParamName);
-        //    if (places > -1)
-        //    {
-        //        // Sheet.SetRangeDataFormat(spv.RowStart, spv.ColStart, spv.Rows, spv.Cols, CellDataFormatFlag.Custom, new DoubleDataFormt());
-        //    }
-        //}
+        #region Check
+        /// <summary>
+        /// 检查数据
+        /// </summary>
+        private void Check()
+        {
+            var sps = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
+            var spvs = sps.SelectMany(x => x.ParamValues).ToList();
+            //if (spvs.Count > 0)
+            {
+                var maxCol = spvs.Count > 0 ? spvs.Max(x => x.ColStart) : 2;
+                var minCol = 2;
+                foreach (var sp in sps)
+                {
+                    if (!IsAuto(sp.ParamName))
+                    {
+                        var row = sp.RowStart;
+                        for (int i = minCol; i <= maxCol; i++)
+                        {
+                            var spv = sp.FindSoluParamValue(row, i);
+                            if (spv is null)
+                            {
+                                spv = CreateSPV(row, i, sp.ParamName, null);
+                                sp.ParamValues.Add(spv);
+                                //break;
+                            }
+
+                            Validate(spv);
+
+                            if (spv.HasError)
+                            {
+                                Sheet.SelectRange(row, i, 1, 1); // 防止不能立即显色
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void SetNullDanger(int row, int col)
+        {
+            var cell = Sheet.CreateAndGetCell(row, col);
+            cell.Style.BackColor = _lightDangerColor.ToReoColor();
+        }
+
+        private void RestoreNullDanger(int row, int col)
+        {
+            var cell = Sheet.CreateAndGetCell(row, col);
+            cell.Style.BackColor = SolidColor.Transparent;
+        }
+
+        #endregion Check
 
         private void RestoreDataFormat(int row, int col, int rows = 1, int cols = 1)
         {
             Sheet.DeleteRangeDataFormat(new RangePosition(row, col, rows, cols));
         }
-
-
 
         private SolutionParamValue CreateSPV(int row, int col, string paramName, object data)
         {
@@ -1199,7 +1266,6 @@ namespace TestReoGrid
             }
             return spv;
         }
-
 
         private void UpdateChRange(SerialSolutionChannel ch)
         {
