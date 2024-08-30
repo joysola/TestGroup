@@ -17,10 +17,12 @@ using TestReoGrid.Models;
 using TestReoGrid.Models.Enums;
 using TestReoGrid.Models.ReoGrid.Old;
 using unvell.ReoGrid;
+using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.Data;
 using unvell.ReoGrid.DataFormat;
 using unvell.ReoGrid.Formula;
 using unvell.ReoGrid.Graphics;
+using unvell.ReoGrid.Interaction;
 
 namespace TestReoGrid
 {
@@ -120,7 +122,7 @@ namespace TestReoGrid
             Freeze();
             // CreateRanges();
             //Data();
-            InitFormula();
+            //InitFormula();
 
             Serial = DataGenerateHelper.CreateNamedRanges(Sheet);
             InitSerial(Serial, Sheet);
@@ -150,8 +152,21 @@ namespace TestReoGrid
             Sheet.CellMouseEnter += Sheet_CellMouseEnter;
             Sheet.CellMouseLeave += Sheet_CellMouseLeave;
             //Sheet.RowsDeleted += Sheet_RowsDeleted;
+            Sheet.BeforeCellKeyDown += Sheet_BeforeCellKeyDown;
         }
 
+        /// <summary>
+        /// 禁用撤回和恢复
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Sheet_BeforeCellKeyDown(object sender, unvell.ReoGrid.Events.BeforeCellKeyDownEventArgs e)
+        {
+            if (e.KeyCode is (KeyCode.Z | KeyCode.Control) or (KeyCode.Y | KeyCode.Control))
+            {
+                e.IsCancelled = true;
+            }
+        }
 
 
 
@@ -230,6 +245,7 @@ namespace TestReoGrid
 
                         // 稀释后进行自动计算
                         AutoCalcuate(newSPV.RowStart, newSPV.ColStart, newSPV.ParamName);
+                        //ReoGrid.DoAction(new SetCellDataAction(row, i, currentConc));
                         Sheet.SetCellData(row, i, currentConc);
                     }
                 }
@@ -839,10 +855,14 @@ namespace TestReoGrid
                     mw = paramMW;
                 }
 
-                if ((concSpv is not null && string.IsNullOrWhiteSpace(concStr)) ||
-                    (mwSpv is not null && string.IsNullOrWhiteSpace(mwStr)))
-                {
 
+                if (concSpv is null && mwSpv is null) // 防止都不存在时，依然计算
+                {
+                    autoSP.ParamValues.Remove(autoSpv);
+                    autoSpv.ParamValue = null;
+                }
+                else if ((concSpv is not null && string.IsNullOrWhiteSpace(concStr)) || (mwSpv is not null && string.IsNullOrWhiteSpace(mwStr))) // 存在，但是没值时
+                {
                     autoSpv.ParamValue = null;
                 }
                 else
@@ -854,7 +874,7 @@ namespace TestReoGrid
                 var cell = Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
                 cell.Style.TextColor = _mainTextColor.ToReoColor();
                 cell.Data = autoSpv.ParamValue;
-                //Sheet.SetCellData(autoSpv.RowStart, autoSpv.ColStart, autoSpv.ParamValue);
+                //ReoGrid.DoAction(new SetCellDataAction(cell.Row, cell.Column, autoSpv.ParamValue));
             }
         }
 
@@ -1006,11 +1026,8 @@ namespace TestReoGrid
                             ch.SolutionParamList.Add(sp);
 
                             Sheet.InsertRows(row, 1);
+                            //ReoGrid.DoAction(new InsertRowsAction(row, 1));
 
-
-                            //var propCell = Sheet.CreateAndGetCell(sp.RowStart, sp.ColStart);
-                            //propCell.Data = sp.ParamAlias;
-                            //propCell.IsReadOnly = true;
 
                             var lowSPs = allSPs.Where(x => x.RowStart >= row).ToList();
                             foreach (var lrow in lowSPs)
@@ -1036,6 +1053,7 @@ namespace TestReoGrid
                     }
                     try
                     {
+                        //ReoGrid.DoAction(new SetCellDataAction(sp.RowStart, sp.ColStart, sp.ParamAlias));
                         var propCell = Sheet.CreateAndGetCell(sp.RowStart, sp.ColStart);
                         propCell.Data = sp.ParamAlias;
                         propCell.IsReadOnly = true;
@@ -1072,12 +1090,15 @@ namespace TestReoGrid
                         if (ch.SolutionParamList.Count == 0)
                         {
                             Sheet.SetCellData(sp.RowStart, sp.ColStart, null);
+                            //ReoGrid.DoAction(new SetCellDataAction(sp.RowStart, sp.ColStart, null));
+
                             // 清空值
                             foreach (var spv in sp.ParamValues)
                             {
                                 var cell = Sheet.GetCell(spv.RowStart, spv.ColStart);
                                 if (cell is not null)
                                 {
+                                    //ReoGrid.DoAction(new SetCellDataAction(spv.RowStart, spv.ColStart, null));
                                     cell.Data = null;
                                 }
                             }
@@ -1110,7 +1131,7 @@ namespace TestReoGrid
                             try
                             {
                                 Sheet.DeleteRows(sp.RowStart, 1);
-
+                                //ReoGrid.DoAction(new RemoveRowsAction(sp.RowStart, 1));
                                 // 更新channel range
                                 UpdateChRange(ch);
                             }
@@ -1129,19 +1150,19 @@ namespace TestReoGrid
 
         #region Formula
 
-        private void InitFormula()
-        {
-            FormulaExtension.CustomFunctions[DilutionFormula] = Dilute;
-        }
+        //private void InitFormula()
+        //{
+        //    FormulaExtension.CustomFunctions[DilutionFormula] = Dilute;
+        //}
 
-        private object Dilute(Cell cell, object[] args)
-        {
-            if (args is [double ratio] && cell.Data is double conc)
-            {
-                return conc / ratio;
-            }
-            return null;
-        }
+        //private object Dilute(Cell cell, object[] args)
+        //{
+        //    if (args is [double ratio] && cell.Data is double conc)
+        //    {
+        //        return conc / ratio;
+        //    }
+        //    return null;
+        //}
 
         #endregion Formula
 
