@@ -210,8 +210,8 @@ namespace TestReoGrid
         {
             _operStatus = OperEnum.Dilute;
             var selRange = Sheet.SelectionRange;
-            // serial时的处理
-            if (selRange.Cols > 1 && selRange.Rows == 1)
+            // serial时的处理, 需要第三列开始计算
+            if (selRange.Cols > 1 && selRange.Rows == 1 && selRange.Col > 1)
             {
                 var row = selRange.Row;
                 var col_End = selRange.EndCol;
