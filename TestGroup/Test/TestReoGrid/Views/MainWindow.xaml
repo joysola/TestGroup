@@ -40,7 +40,7 @@
 
                 <!--<Button Style="{StaticResource ButtonDashedPrimary.Small}"
                         Margin="20,0,0,0"
-                        Command="{Binding DeletePropCommand}"
+    2.00                    Command="{Binding DeletePropCommand}"
                         CommandParameter="{Binding SelectedFilterCol}"
                         Content="DeleteProp" />
 
@@ -52,9 +52,8 @@
                                   Value="{Binding DilutionRatio,UpdateSourceTrigger=PropertyChanged}"
                                   hc:TitleElement.TitlePlacement="Left"
                                   hc:TitleElement.Title="Dilute:"
-                                  Increment="1"
-                                  Minimum="1"
-                                  DecimalPlaces="0"
+                                  Minimum="0.001"
+                                  DecimalPlaces="2"
                                   MinWidth="150"
                                   x:Name="RaitoNud"
                                   Margin="0,0,0,0" />
