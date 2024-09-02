@@ -20,7 +20,7 @@ namespace TestReoGrid
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = new MainWindowViewModel();
+            this.DataContext = new MainWindow_ParallelViewModel();
 
 
         }

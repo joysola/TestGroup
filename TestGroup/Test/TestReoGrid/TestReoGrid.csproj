@@ -10,6 +10,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="ViewModels\MainWindowViewModel.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="ekra-ltd.ReoGridWPF.dll" Version="3.1.3" />
 		<PackageReference Include="HandyControl" Version="3.5.1" />
