@@ -305,7 +305,53 @@ namespace TestReoGrid.Helpers
 
 
 
+        public static ParallelRange CreateParallelRange(Worksheet sheet)
+        {
+            var range = new ParallelRange();
+            range.Channels = [.. Channels.DeepMap()];
 
+            var channels = range.Channels;
+            var rowMax = sheet.RowCount;
+            var colMax = sheet.ColumnCount;
+            for (int r = 0; r < channels.Count; r++)
+            {
+                var ch = channels[r];
+                ch.RowStart = r + 1; // 从1开始算,第一行空开
+                ch.RowEnd = ch.RowStart;
+                ch.ColStart = 0;
+                ch.ColEnd = 0;
+
+                ch.NameKey = $"{ch.Channel_No}";
+
+                //result.Add(ch);
+            }
+
+            for (int i = 0; i < range.ParallelSolutionParams.Count; i++)
+            {
+                var prop = range.ParallelSolutionParams[i];
+                prop.RowStart = 0;
+                prop.RowEnd = prop.RowStart;
+
+                prop.ColStart = i + 1;
+                prop.ColEnd = prop.ColStart;
+
+                //prop.NameKey = $"{ch.NameKey}@{prop.ParamName}";
+                if (channels.Count == prop.ParamValues.Count)
+                {
+                    for (int j = 0; j < prop.ParamValues.Count; j++)
+                    {
+                        var cell = prop.ParamValues[j];
+                        //cell.NameKey = $"{prop.NameKey}@{cell.ColStart}"; // ???????
+                        cell.RowStart = channels[j].RowStart;
+                        cell.RowEnd = channels[j].RowEnd;
+
+                        cell.ColStart = prop.ColStart;
+                    }
+                }
+            }
+
+            return range;
+        }
 
 
 

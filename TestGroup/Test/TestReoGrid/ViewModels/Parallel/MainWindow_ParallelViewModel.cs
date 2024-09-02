@@ -44,20 +44,13 @@ namespace TestReoGrid
             Foreground = (Brush)Application.Current.Resources["PL_DangerBrush"],
         };
 
-        //private const string Channels = "Channels";
-        //private const string Props = "Props";
-
-        //private RangeBorderStyle _dangerRangeBdStyle = new()
-        //{
-        //    Color = ((Brush)Application.Current.Resources["PL_DangerBrush"]).ToReoColor(),
-        //    Style = BorderLineStyle.Solid
-        //};
-
         /// <summary>
         /// Serial 命名Range集合
         /// </summary>
         public SerialRange Serial { get; set; }
 
+
+        public ParallelRange Parallel { get; set; }
 
         private OperEnum _operStatus;
 
@@ -78,19 +71,19 @@ namespace TestReoGrid
         [ObservableProperty]
         private Worksheet _sheet;
 
-        [ObservableProperty]
-        private AutoColumnFilter _propFilter;
+        //[ObservableProperty]
+        //private AutoColumnFilter _propFilter;
 
 
-        [ObservableProperty]
-        private Dictionary<string, string> _filterDict = new()
-        {
-            [nameof(PL_Exp_Dsgn_Inject.Solution_Name)] = "Name",
-            [nameof(PL_Exp_Dsgn_Inject.Concentration)] = "Conc.",
-            [nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)] = "MW",
-            [nameof(PL_Exp_Dsgn_Inject.Info)] = "Info",
-            [nameof(PL_Exp_Dsgn_Inject.Mass_concentration)] = "Mass Conc.",
-        };
+        //[ObservableProperty]
+        //private Dictionary<string, string> _filterDict = new()
+        //{
+        //    [nameof(PL_Exp_Dsgn_Inject.Solution_Name)] = "Name",
+        //    [nameof(PL_Exp_Dsgn_Inject.Concentration)] = "Conc.",
+        //    [nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)] = "MW",
+        //    [nameof(PL_Exp_Dsgn_Inject.Info)] = "Info",
+        //    [nameof(PL_Exp_Dsgn_Inject.Mass_concentration)] = "Mass Conc.",
+        //};
 
         [ObservableProperty]
         private string _selectedFilterCol;
@@ -127,8 +120,8 @@ namespace TestReoGrid
             //Data();
             //InitFormula();
 
-            Serial = DataGenerateHelper.CreateNamedRanges(Sheet);
-            InitSerial(Serial, Sheet);
+            Parallel = DataGenerateHelper.CreateParallelRange(Sheet);
+            InitParallel(Parallel, Sheet);
 
             _toolTip.PlacementTarget = this.ReoGrid;
             //Sheet.AfterRangeCopy += Sheet_AfterRangeCopy;
@@ -176,34 +169,34 @@ namespace TestReoGrid
         /// <summary>
         /// WPF 没有相应的界面
         /// </summary>
-        [RelayCommand]
-        private void SetFilter()
-        {
-            PropFilter?.Detach();
-            PropFilter = Sheet.CreateColumnFilter("B", "B", 0, unvell.ReoGrid.Data.AutoColumnFilterUI.NoGUI);
-            var selectedItems = PropFilter.Columns["B"].SelectedTextItems;
-            selectedItems.Clear();
-            if (SelectedFilterCol is { Length: > 0 })
-            {
-                selectedItems.AddRange([FilterDict[SelectedFilterCol]]);
-            }
-            else
-            {
-                selectedItems.AddRange(FilterDict.Values);
-            }
-            PropFilter.Apply();
-        }
+        //[RelayCommand]
+        //private void SetFilter()
+        //{
+        //    PropFilter?.Detach();
+        //    PropFilter = Sheet.CreateColumnFilter("B", "B", 0, unvell.ReoGrid.Data.AutoColumnFilterUI.NoGUI);
+        //    var selectedItems = PropFilter.Columns["B"].SelectedTextItems;
+        //    selectedItems.Clear();
+        //    if (SelectedFilterCol is { Length: > 0 })
+        //    {
+        //        selectedItems.AddRange([FilterDict[SelectedFilterCol]]);
+        //    }
+        //    else
+        //    {
+        //        selectedItems.AddRange(FilterDict.Values);
+        //    }
+        //    PropFilter.Apply();
+        //}
 
         /// <summary>
         /// 测试
         /// </summary>
         [RelayCommand]
-        private void GetSerialData()
+        private void GetData()
         {
             // 结束编辑
             Sheet.EndEdit(EndEditReason.NormalFinish);
             Check(); // 检查数据
-            var xx = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
+            var xx = Parallel.ParallelSolutionParams.ToList();
             var yy = xx.SelectMany(x => x.ParamValues).ToList();
             if (yy.Exists(x => x.HasError))
             {
@@ -278,7 +271,7 @@ namespace TestReoGrid
         {
             if (propName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
             {
-                var spvs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).SelectMany(x => x.ParamValues)
+                var spvs = Parallel.ParallelSolutionParams.SelectMany(x => x.ParamValues)
                      .Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)).ToList();
                 foreach (var spv in spvs)
                 {
@@ -1303,7 +1296,7 @@ namespace TestReoGrid
             //reoGrid.SetSettings(unvell.ReoGrid.WorkbookSettings.View_ShowSheetTabControl, false);
 
             var sheet = reoGrid.CurrentWorksheet;
-            sheet.Name = "Serial";
+            sheet.Name = "Parallel";
 
             //DataFormatterManager.Instance.DataFormatters.Add(CellDataFormatFlag.Custom, new DoubleDataFormt());
         }
@@ -1327,8 +1320,8 @@ namespace TestReoGrid
 
         private void Freeze()
         {
-            // 冻结到序号2列
-            Sheet.FreezeToCell(0, 2, FreezeArea.Left);
+            // 冻结到序号1列
+            Sheet.FreezeToCell(0, 1, FreezeArea.Left);
             //Sheet.Unfreeze();
         }
 
@@ -1366,13 +1359,13 @@ namespace TestReoGrid
         //    PropRange.Data = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" }; ;
         //}
 
-        public void InitSerial(SerialRange serial, Worksheet sheet)
+        public void InitParallel(ParallelRange parallel, Worksheet sheet)
         {
             // 1. 设置列宽（前两列需要加宽）
             sheet.SetColumnsWidth(0, 1, 120);
             sheet.SetColumnsWidth(1, 1, 100);
 
-            var sps = serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
+            var sps = parallel.ParallelSolutionParams;
             if (sps.Count > 0)
             {
                 sheet.DisableSettings(WorksheetSettings.Edit_Readonly);
@@ -1383,11 +1376,11 @@ namespace TestReoGrid
             }
 
             // 2. 填充部分数据
-            for (int i = 0; i < serial.SolutionChannels.Count; i++)
+            for (int i = 0; i < parallel.Channels.Count; i++)
             {
                 // 1-1 channel的范围1格
-                //var chRange = serial.ChNamedRanges[i];
-                var chD = serial.SolutionChannels[i];
+           
+                var chD = parallel.Channels[i];
 
                 Sheet.UndefineNamedRange(chD.NameKey);
                 var newRange = Sheet.DefineNamedRange(chD.NameKey, chD.RowStart, chD.ColStart, chD.Rows, chD.Cols);
@@ -1397,29 +1390,29 @@ namespace TestReoGrid
                 newRange.IsReadonly = true;
                 // 合并成1列
                 //sheet.MergeRange(chRange);
-                newRange.Data = new[] { $"channel{serial.SolutionChannels[i].ChannelInfo.Channel_No + 1}" };
+                newRange.Data = new[] { $"channel{parallel.Channels[i].Channel_No + 1}" };
 
-                for (int j = 0; j < chD.SolutionParamList.Count; j++)
+            }
+
+            for (int j = 0; j < parallel.ParallelSolutionParams.Count; j++)
+            {
+                // 1-2. Prop的范围1格
+                var propD = parallel.ParallelSolutionParams[j];
+
+                var propCell = sheet.CreateAndGetCell(propD.RowStart, propD.ColStart);
+                propCell.Data = propD.ParamAlias;
+                propCell.IsReadOnly = true;
+                // 1-3. val的范围1格
+                for (int k = 0; k < propD.ParamValues.Count; k++)
                 {
-                    // 1-2. Prop的范围1格
-                    var propD = chD.SolutionParamList[j];
-
-                    var propCell = sheet.CreateAndGetCell(propD.RowStart, propD.ColStart);
-                    propCell.Data = propD.ParamAlias;
-                    propCell.IsReadOnly = true;
-                    // 1-3. val的范围1格
-                    for (int k = 0; k < propD.ParamValues.Count; k++)
-                    {
-                        var valD = propD.ParamValues[k];
-                        var valCell = sheet.CreateAndGetCell(valD.RowStart, valD.ColStart);
-                        valCell.Data = valD.ParamValue;
-                    }
+                    var valD = propD.ParamValues[k];
+                    var valCell = sheet.CreateAndGetCell(valD.RowStart, valD.ColStart);
+                    valCell.Data = valD.ParamValue;
                 }
             }
 
             // 3. 调整sheet的最大行数
-            //var rows = serial.SolutionChannels.Max(x => x.RowEnd) + 1;
-            // sheet.SetRows(rows);
+           
             SetMaxRows();
         }
         #endregion Init Reogrid

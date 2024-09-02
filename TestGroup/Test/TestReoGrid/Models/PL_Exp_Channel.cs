@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TestReoGrid.Models
 {
-    public partial class PL_Exp_Channel : PLBase
+    public partial class PL_Exp_Channel : PLBase, IReoModel
     {
         /// <summary>
         /// 实验Id
@@ -31,5 +31,17 @@ namespace TestReoGrid.Models
         /// </summary>
         [ObservableProperty]
         private bool _is_Selected;
+
+
+        public string NameKey { get; set; }
+
+        public int RowStart { get; set; }
+        public int RowEnd { get; set; }
+
+        public int ColStart { get; set; }
+        public int ColEnd { get; set; }
+
+        public int Rows => RowEnd - RowStart + 1;
+        public int Cols => ColEnd - ColStart + 1;
     }
 }
