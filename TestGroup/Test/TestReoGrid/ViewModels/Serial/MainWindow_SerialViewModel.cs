@@ -551,7 +551,6 @@ namespace TestReoGrid
 
                         RestoreDataFormat(cell.Row, cell.Column);
 
-                        AutoCalcuate(row, col, spv.ParamName);
                         return true;
                     });
                     break;
@@ -561,12 +560,15 @@ namespace TestReoGrid
                     {
                         var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
 
-                        Serial.SolutionChannels.RemoveSoluParamValue(row, col);
-                        //RestoreBorder(cell.Row, cell.Column);
-                        RestoreCell(cell.Row, cell.Column);
+                        if (spv is not null)
+                        {
+                            Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                            //RestoreBorder(cell.Row, cell.Column);
+                            RestoreCell(cell.Row, cell.Column);
 
-                        RestoreDataFormat(cell.Row, cell.Column);
-                        AutoCalcuate(row, col, spv.ParamName);
+                            RestoreDataFormat(cell.Row, cell.Column);
+                            AutoCalcuate(row, col, spv.ParamName);
+                        }
 
                         return true;
                     });
