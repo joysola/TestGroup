@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TestReoGrid.Models.ReoGrid.Old;
 using unvell.ReoGrid.Data;
 using unvell.ReoGrid;
+using TestReoGrid.Models.ReoGrid;
 
 namespace TestReoGrid.ViewModels
 {

@@ -15,6 +15,7 @@ using TestReoGrid.DataFormats;
 using TestReoGrid.Helpers;
 using TestReoGrid.Models;
 using TestReoGrid.Models.Enums;
+using TestReoGrid.Models.ReoGrid;
 using TestReoGrid.Models.ReoGrid.Old;
 using unvell.ReoGrid;
 using unvell.ReoGrid.Actions;

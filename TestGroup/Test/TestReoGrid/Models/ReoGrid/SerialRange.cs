@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using unvell.ReoGrid;
 
-namespace TestReoGrid.Models.ReoGrid.Old
+namespace TestReoGrid.Models.ReoGrid
 {
     public class SerialRange
     {
