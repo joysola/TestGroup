@@ -9,7 +9,7 @@
         xmlns:local="clr-namespace:TestReoGrid"
         xmlns:vm="clr-namespace:TestReoGrid"
         WindowStartupLocation="CenterScreen"
-        d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
+        d:DataContext="{d:DesignInstance Type=vm:MainWindow_ParallelViewModel}"
         mc:Ignorable="d"
         Title="MainWindow"
         Height="550"
@@ -68,9 +68,9 @@
 
                 <Button Style="{StaticResource ButtonDashedPrimary.Small}"
                         Margin="20,0,0,0"
-                        Command="{Binding GetSerialDataCommand}"
+                        Command="{Binding GetDataCommand}"
                         CommandParameter="{Binding SelectedFilterCol}"
-                        Content="GetSerialData" />
+                        Content="GetData" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal"

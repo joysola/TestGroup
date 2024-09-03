@@ -10,7 +10,7 @@ namespace TestReoGrid.Helpers
 {
     public static class ReoSoluParamValueExtensions
     {
-        public static SolutionParam FindSoluParam(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
+        public static SolutionParam FindSerialSoluParam(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
         {
             SolutionParam sp = null;
             if (solutionChannels?.Count > 0 && row > -1 && col > -1)
@@ -24,8 +24,18 @@ namespace TestReoGrid.Helpers
             }
             return sp;
         }
-
-
+        public static SolutionParam FindParallelSoluParam(this IList<SolutionParam> sps, int row, int col)
+        {
+            var sp = sps?.FirstOrDefault(x => x.ColStart == col);
+            return sp;
+        }
+        /// <summary>
+        /// 从sp寻找spv
+        /// </summary>
+        /// <param name="sp"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
         public static SolutionParamValue FindSoluParamValue(this SolutionParam sp, int row, int col)
         {
             SolutionParamValue spv = null;
@@ -35,11 +45,17 @@ namespace TestReoGrid.Helpers
             }
             return spv;
         }
-
+        /// <summary>
+        /// (Serial)
+        /// </summary>
+        /// <param name="solutionChannels"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
         public static SolutionParamValue FindSoluParamValue(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
         {
             SolutionParamValue spv = null;
-            var sp = FindSoluParam(solutionChannels, row, col);
+            var sp = FindSerialSoluParam(solutionChannels, row, col);
             if (sp is not null && row > -1 && col > -1)
             {
                 spv = sp.ParamValues.FirstOrDefault(x => x.RowStart == row && x.ColStart == col);
@@ -47,7 +63,26 @@ namespace TestReoGrid.Helpers
             return spv;
         }
 
-
+        /// <summary>
+        /// (Parallel)
+        /// </summary>
+        /// <param name="sps"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        public static SolutionParamValue FindSoluParamValue(this IList<SolutionParam> sps, int row, int col)
+        {
+            SolutionParamValue spv = null;
+            if (sps?.Count > 0)
+            {
+                var sp = sps.FindParallelSoluParam(row, col);
+                if (sp is not null)
+                {
+                    spv = sp.FindSoluParamValue(row, col);
+                }
+            }
+            return spv;
+        }
 
         public static SerialSolutionChannel FindSolutionChannel(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
         {
@@ -56,12 +91,36 @@ namespace TestReoGrid.Helpers
             return soluCh;
         }
 
-
-        public static bool RemoveSoluParamValue(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
+        /// <summary>
+        /// Serial
+        /// </summary>
+        /// <param name="solutionChannels"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        public static bool RemoveSerialSoluParamValue(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
         {
             var result = false;
-            var sp = solutionChannels.FindSoluParam(row, col);
+            var sp = solutionChannels.FindSerialSoluParam(row, col);
             var spv = sp.FindSoluParamValue(row, col);
+            if (sp is not null && spv is not null)
+            {
+                result = sp.ParamValues.Remove(spv);
+            }
+            return result;
+        }
+        /// <summary>
+        /// Parallel
+        /// </summary>
+        /// <param name="sps"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        public static bool RemoveParallelSoluParamValue(this IList<SolutionParam> sps, int row, int col)
+        {
+            var result = false;
+            var sp = sps.FindParallelSoluParam(row, col);
+            var spv = sp?.FindSoluParamValue(row, col);
             if (sp is not null && spv is not null)
             {
                 result = sp.ParamValues.Remove(spv);

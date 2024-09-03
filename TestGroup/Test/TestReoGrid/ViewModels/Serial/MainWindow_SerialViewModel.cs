@@ -230,7 +230,7 @@ namespace TestReoGrid
                 var col_start = selRange.Col;
 
                 var dataCell = Sheet.GetCell(row, col_End); // 找最后一个
-                var sp = Serial.SolutionChannels.FindSoluParam(row, col_End);
+                var sp = Serial.SolutionChannels.FindSerialSoluParam(row, col_End);
                 var spv = sp.FindSoluParamValue(row, col_End);
                 if (dataCell is not null &&
                     spv is not null &&
@@ -405,7 +405,7 @@ namespace TestReoGrid
                 {
                     var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
 
-                    Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                    Serial.SolutionChannels.RemoveSerialSoluParamValue(row, col);
                     //RestoreBorder(cell.Row, cell.Column);
                     RestoreCell(cell.Row, cell.Column);
                     RestoreDataFormat(cell.Row, cell.Column);
@@ -420,7 +420,7 @@ namespace TestReoGrid
                     var soluCh = Serial.SolutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
                     if (soluCh is not null)
                     {
-                        var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                        var sp = Serial.SolutionChannels.FindSerialSoluParam(row, col);
                         var spv = sp.FindSoluParamValue(row, col);
                         sp?.ParamValues?.Remove(spv);
 
@@ -507,7 +507,7 @@ namespace TestReoGrid
                 //    ColEnd = col,
                 //    ParamValue = $"{cell.Data}",
                 //};
-                var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                var sp = Serial.SolutionChannels.FindSerialSoluParam(row, col);
                 var oldSpv = sp.FindSoluParamValue(row, col);
                 sp?.ParamValues?.Remove(oldSpv); // 目标位置已经有值，则先删除
                                                  //RestoreBorder(cell.Row, cell.Column);
@@ -546,7 +546,7 @@ namespace TestReoGrid
                     {
                         var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
 
-                        Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                        Serial.SolutionChannels.RemoveSerialSoluParamValue(row, col);
                         //RestoreBorder(cell.Row, cell.Column);
                         RestoreCell(cell.Row, cell.Column);
 
@@ -563,7 +563,7 @@ namespace TestReoGrid
 
                         if (spv is not null)
                         {
-                            Serial.SolutionChannels.RemoveSoluParamValue(row, col);
+                            Serial.SolutionChannels.RemoveSerialSoluParamValue(row, col);
                             //RestoreBorder(cell.Row, cell.Column);
                             RestoreCell(cell.Row, cell.Column);
 
@@ -601,7 +601,7 @@ namespace TestReoGrid
                 var row = e.Cell.Row;
 
 
-                var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                var sp = Serial.SolutionChannels.FindSerialSoluParam(row, col);
                 //var pRow = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).FirstOrDefault(x => x.RowStart == row);
                 if (sp is not null)
                 {
@@ -756,7 +756,7 @@ namespace TestReoGrid
             {
                 var row = cell.Row;
                 var col = cell.Column;
-                var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                var sp = Serial.SolutionChannels.FindSerialSoluParam(row, col);
                 var spv = sp.FindSoluParamValue(row, col);
                 if (spv != null)
                 {

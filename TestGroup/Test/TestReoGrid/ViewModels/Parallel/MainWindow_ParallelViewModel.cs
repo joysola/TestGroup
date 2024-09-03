@@ -215,16 +215,16 @@ namespace TestReoGrid
         {
             _operStatus = OperEnum.Dilute;
             var selRange = Sheet.SelectionRange;
-            // serial时的处理, 需要第三列开始计算
-            if (selRange.Cols > 1 && selRange.Rows == 1 && selRange.Col > 1)
+            // parallel时的处理, 需要第一列开始计算，第二行开始
+            if (selRange.Rows > 1 && selRange.Cols == 1 && selRange.Row > 0)
             {
-                var row = selRange.Row;
-                var col_End = selRange.EndCol;
-                var col_start = selRange.Col;
+                var col = selRange.Col;
+                var row_start = selRange.Row;
+                var row_End = selRange.EndRow;
 
-                var dataCell = Sheet.GetCell(row, col_End); // 找最后一个
-                var sp = Serial.SolutionChannels.FindSoluParam(row, col_End);
-                var spv = sp.FindSoluParamValue(row, col_End);
+                var dataCell = Sheet.GetCell(row_End, col); // 找最后一个
+                var sp = Parallel.ParallelSolutionParams.FindParallelSoluParam(row_End, col);
+                var spv = sp.FindSoluParamValue(row_End, col);
                 if (dataCell is not null &&
                     spv is not null &&
                     spv.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) &&
@@ -233,14 +233,14 @@ namespace TestReoGrid
                 {
 
                     var currentConc = conc;
-                    for (int i = col_End - 1; i >= col_start; i--)
+                    for (int i = row_End - 1; i >= row_start; i--)
                     {
                         currentConc = Math.Round(currentConc / dilutionRatio, Digital, MidpointRounding.AwayFromZero);
 
-                        var newSPV = sp.FindSoluParamValue(row, i);
+                        var newSPV = sp.FindSoluParamValue(i, col);
                         if (newSPV is null)
                         {
-                            newSPV = CreateSPV(row, i, sp.ParamName, currentConc);
+                            newSPV = CreateSPV(i, col, sp.ParamName, currentConc);
                             sp.ParamValues.Add(newSPV); // 新增则加入集合
                         }
                         else
@@ -250,7 +250,7 @@ namespace TestReoGrid
 
                         // 稀释后进行自动计算
                         AutoCalcuate(newSPV.RowStart, newSPV.ColStart, newSPV.ParamName);
-                        var cell = Sheet.CreateAndGetCell(row, i);
+                        var cell = Sheet.CreateAndGetCell(i, col);
                         cell.Data = currentConc;
                         Validate(newSPV);
                         //ReoGrid.DoAction(new SetCellDataAction(row, i, currentConc));
@@ -286,9 +286,9 @@ namespace TestReoGrid
         private void DeleteProp(string selectedFilterCol)
         {
             _operStatus = OperEnum.DeleteRow;
-            UndefineAutoRange(); // 解除定义，防止删除丢失范围
+            //UndefineAutoRange(); // 解除定义，防止删除丢失范围
             DeletePropCore(selectedFilterCol);
-            DefineAutoRange(); // 恢复定义
+            //DefineAutoRange(); // 恢复定义
             _operStatus = OperEnum.None;
         }
 
@@ -396,10 +396,9 @@ namespace TestReoGrid
                 // from
                 Sheet.IterateCells(e.FromRange, (row, col, cell) =>
                 {
-                    var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
+                    var spv = Parallel.ParallelSolutionParams.FindSoluParamValue(row, col);
+                    Parallel.ParallelSolutionParams.RemoveParallelSoluParamValue(row, col);
 
-                    Serial.SolutionChannels.RemoveSoluParamValue(row, col);
-                    //RestoreBorder(cell.Row, cell.Column);
                     RestoreCell(cell.Row, cell.Column);
                     RestoreDataFormat(cell.Row, cell.Column);
 
@@ -410,23 +409,14 @@ namespace TestReoGrid
                 // to
                 Sheet.IterateCells(e.ToRange, (row, col, cell) =>
                 {
-                    var soluCh = Serial.SolutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
-                    if (soluCh is not null)
+                    var sp = Parallel.ParallelSolutionParams.FindParallelSoluParam(row, col);
+                    if (sp is not null)
                     {
-                        var sp = Serial.SolutionChannels.FindSoluParam(row, col);
                         var spv = sp.FindSoluParamValue(row, col);
                         sp?.ParamValues?.Remove(spv);
 
                         spv = CreateSPV(row, col, sp.ParamName, cell.Data);
-                        //new SolutionParamValue
-                        //{
-                        //    RowStart = row,
-                        //    RowEnd = row,
-                        //    ColStart = col,
-                        //    ColEnd = col,
-                        //    ParamValue = $"{cell.Data}",
-                        //    ParamName = sp.ParamName,
-                        //};
+
                         sp.ParamValues.Add(spv);
                         Validate(spv);
 
@@ -492,15 +482,7 @@ namespace TestReoGrid
         {
             Sheet.IterateCells(e.Range, (row, col, cell) =>
             {
-                //new SolutionParamValue
-                //{
-                //    RowStart = row,
-                //    RowEnd = row,
-                //    ColStart = col,
-                //    ColEnd = col,
-                //    ParamValue = $"{cell.Data}",
-                //};
-                var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                var sp = Parallel.ParallelSolutionParams.FindParallelSoluParam(row, col);
                 var oldSpv = sp.FindSoluParamValue(row, col);
                 sp?.ParamValues?.Remove(oldSpv); // 目标位置已经有值，则先删除
                                                  //RestoreBorder(cell.Row, cell.Column);
@@ -535,36 +517,24 @@ namespace TestReoGrid
             switch (_operStatus)
             {
                 case OperEnum.Copy:
-                    Sheet.IterateCells(e.Range, (row, col, cell) =>
-                    {
-                        var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
-
-                        Serial.SolutionChannels.RemoveSoluParamValue(row, col);
-                        //RestoreBorder(cell.Row, cell.Column);
-                        RestoreCell(cell.Row, cell.Column);
-
-                        RestoreDataFormat(cell.Row, cell.Column);
-
-                        AutoCalcuate(row, col, spv.ParamName);
-                        return true;
-                    });
-                    break;
-
                 case OperEnum.Delete:
                     Sheet.IterateCells(e.Range, (row, col, cell) =>
                     {
-                        var spv = Serial.SolutionChannels.FindSoluParamValue(row, col);
+                        var spv = Parallel.ParallelSolutionParams.FindSoluParamValue(row, col);
+                        Parallel.ParallelSolutionParams.RemoveParallelSoluParamValue(row, col);
 
-                        Serial.SolutionChannels.RemoveSoluParamValue(row, col);
-                        //RestoreBorder(cell.Row, cell.Column);
                         RestoreCell(cell.Row, cell.Column);
 
                         RestoreDataFormat(cell.Row, cell.Column);
-                        AutoCalcuate(row, col, spv.ParamName);
 
+                        AutoCalcuate(row, col, spv.ParamName);
                         return true;
                     });
-                    _operStatus = OperEnum.None;
+
+                    if (_operStatus is OperEnum.Delete)
+                    {
+                        _operStatus = OperEnum.None;
+                    }
                     break;
             }
         }
@@ -591,27 +561,15 @@ namespace TestReoGrid
                 var col = e.Cell.Column;
                 var row = e.Cell.Row;
 
+                var sp = Parallel.ParallelSolutionParams.FindParallelSoluParam(row, col);
 
-                var sp = Serial.SolutionChannels.FindSoluParam(row, col);
-                //var pRow = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).FirstOrDefault(x => x.RowStart == row);
                 if (sp is not null)
                 {
-                    //var cell = pRow.ParamValues.FirstOrDefault(x => x.ColStart == col);
                     var spv = sp.FindSoluParamValue(row, col);
                     if (spv is null)
                     {
 
                         spv = CreateSPV(row, col, sp.ParamName, data);
-                        //    new SolutionParamValue()
-                        //{
-                        //    //NameKey = $"{pRow.NameKey}@{col - pRow.ColStart}",
-                        //    RowStart = sp.RowStart,
-                        //    RowEnd = sp.RowStart,
-                        //    ColStart = col,
-                        //    ColEnd = col,
-                        //    ParamName = sp.ParamName,
-                        //    ParamValue = $"{data}",
-                        //};
                         sp.ParamValues.Add(spv);
                     }
                     else
@@ -747,7 +705,7 @@ namespace TestReoGrid
             {
                 var row = cell.Row;
                 var col = cell.Column;
-                var sp = Serial.SolutionChannels.FindSoluParam(row, col);
+                var sp = Parallel.ParallelSolutionParams.FindParallelSoluParam(row, col);
                 var spv = sp.FindSoluParamValue(row, col);
                 if (spv != null)
                 {
@@ -781,7 +739,7 @@ namespace TestReoGrid
             _operStatus = OperEnum.Auto;
             if (paramName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight))
             {
-                var sps = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList);
+                var sps = Parallel.ParallelSolutionParams;
                 var autoSPs = sps.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration)).ToList();
                 var pairSPs = sps.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight)).ToList();
 
@@ -825,25 +783,22 @@ namespace TestReoGrid
         /// <param name="col"></param>
         private void AutoCalcuateCore(int row, int col)
         {
-            var ch = Serial.SolutionChannels.FindSolutionChannel(row, col);
-            var sps = ch.SolutionParamList;
+            var sps = Parallel.ParallelSolutionParams;
             var autoSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
             var concSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
             var mwSP = sps.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
 
-            var colSPVs = sps.SelectMany(x => x.ParamValues).Where(x => x.ColStart == col).ToList();
+            var rowSPVs = sps.SelectMany(x => x.ParamValues).Where(x => x.RowStart == row).ToList();
 
-            var autoSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+            var autoSpv = rowSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
             if (autoSpv is null)
             {
-                autoSpv = CreateSPV(autoSP.RowStart, col, autoSP.ParamName, null);
+                autoSpv = CreateSPV(row, autoSP.ColStart, autoSP.ParamName, null);
                 autoSP.ParamValues.Add(autoSpv);
-                //var autoCell = Sheet.CreateAndGetCell(autoSpv.RowStart, autoSpv.ColStart);
-                //autoCell.IsReadOnly = true;
             }
 
-            var concSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
-            var mwSpv = colSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+            var concSpv = rowSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration));
+            var mwSpv = rowSPVs.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
 
             if (autoSpv is not null)
             {
@@ -897,14 +852,14 @@ namespace TestReoGrid
         /// <returns></returns>
         private bool ContainsAutoSP()
         {
-            var autoSPs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration)).ToList();
+            var autoSPs = Parallel.ParallelSolutionParams.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration)).ToList();
             return autoSPs.Count > 0;
         }
 
         private bool IsAutoSPV(int row, int column)
         {
             var result = false;
-            var spv = Serial.SolutionChannels.FindSoluParamValue(row, column);
+            var spv = Parallel.ParallelSolutionParams.FindSoluParamValue(row, column);
             if (spv is not null)
             {
                 result = spv.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration);
@@ -922,53 +877,53 @@ namespace TestReoGrid
         private void DeleteAutoSP()
         {
             // 1. 
-            UndefineAutoRange();
+            //UndefineAutoRange();
             // 2.
             DeletePropCore(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
         }
         /// <summary>
         /// 解除定义autoRange
         /// </summary>
-        private void UndefineAutoRange()
-        {
-            foreach (var ch in Serial.SolutionChannels)
-            {
-                var autoSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+        //private void UndefineAutoRange()
+        //{
+        //    foreach (var ch in Serial.SolutionChannels)
+        //    {
+        //        var autoSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
 
-                if (autoSP is not null)
-                {
-                    var rangeName = $"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}";
-                    var range = Sheet.GetNamedRange(rangeName);
-                    if (range is not null)
-                    {
-                        range.Style.TextColor = SolidColor.Black;
-                        range.IsReadonly = false;
-                    }
-                    var xx = Sheet.UndefineNamedRange(rangeName);
-                }
-            }
-        }
+        //        if (autoSP is not null)
+        //        {
+        //            var rangeName = $"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}";
+        //            var range = Sheet.GetNamedRange(rangeName);
+        //            if (range is not null)
+        //            {
+        //                range.Style.TextColor = SolidColor.Black;
+        //                range.IsReadonly = false;
+        //            }
+        //            var xx = Sheet.UndefineNamedRange(rangeName);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// 定义autorange
         /// </summary>
-        private void DefineAutoRange()
-        {
-            foreach (var ch in Serial.SolutionChannels)
-            {
-                var autoSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+        //private void DefineAutoRange()
+        //{
+        //    foreach (var ch in Serial.SolutionChannels)
+        //    {
+        //        var autoSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
 
-                if (autoSP is not null)
-                {
-                    var newRange = Sheet.DefineNamedRange($"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}", autoSP.RowStart, autoSP.ColStart, 1, Sheet.ColumnCount);
-                    if (newRange is not null)
-                    {
-                        newRange.Style.TextColor = _mainTextColor.ToReoColor();
-                        newRange.IsReadonly = true;
-                    }
-                }
-            }
-        }
+        //        if (autoSP is not null)
+        //        {
+        //            var newRange = Sheet.DefineNamedRange($"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}", autoSP.RowStart, autoSP.ColStart, 1, Sheet.ColumnCount);
+        //            if (newRange is not null)
+        //            {
+        //                newRange.Style.TextColor = _mainTextColor.ToReoColor();
+        //                newRange.IsReadonly = true;
+        //            }
+        //        }
+        //    }
+        //}
 
 
         /// <summary>
@@ -978,32 +933,26 @@ namespace TestReoGrid
         {
             // 1. 
             AddPropCore(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
-            foreach (var ch in Serial.SolutionChannels)
+
+            var autoSP = Parallel.ParallelSolutionParams.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+            if (autoSP is not null)
             {
-                var autoSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
-                if (autoSP is not null)
+                var cell = Sheet.GetCell(autoSP.RowStart, autoSP.ColStart);
+                if (cell != null)
+                    cell.Style.TextColor = _mainTextColor.ToReoColor();
+
+
+                // 重新触发自动计算
+                var pairSPs = Parallel.ParallelSolutionParams.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
+                var pairSPVs = pairSPs.SelectMany(x => x.ParamValues);
+                foreach (var spv in pairSPVs)
                 {
-
-                    var cell = Sheet.GetCell(autoSP.RowStart, autoSP.ColStart);
-                    if (cell != null)
-                        cell.Style.TextColor = _mainTextColor.ToReoColor();
-
-                    //var newRange = Sheet.DefineNamedRange($"{ch.ChannelInfo.Channel_No}@{autoSP.ParamName}", autoSP.RowStart, autoSP.ColStart, 1, Sheet.ColumnCount);
-                    //if (newRange is not null)
-                    //{
-                    //    newRange.IsReadonly = true;
-                    //}
-                    // 重新触发自动计算
-                    var pairSPs = ch.SolutionParamList.Where(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Concentration) or nameof(PL_Exp_Dsgn_Inject.Molecular_Weight));
-                    var pairSPVs = pairSPs.SelectMany(x => x.ParamValues);
-                    foreach (var spv in pairSPVs)
-                    {
-                        AutoCalcuate(spv.RowStart, spv.ColStart, spv.ParamName);
-                    }
+                    AutoCalcuate(spv.RowStart, spv.ColStart, spv.ParamName);
                 }
             }
+
             // 2. 
-            DefineAutoRange();
+            //DefineAutoRange();
         }
 
 
@@ -1012,81 +961,29 @@ namespace TestReoGrid
             if (selectedFilterCol is { Length: > 0 })
             {
                 Sheet.DisableSettings(WorksheetSettings.Edit_Readonly);
-                var allSPs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
-                foreach (var ch in Serial.SolutionChannels)
+
+                var allSPs = Parallel.ParallelSolutionParams;
+
+                var existedSP = allSPs.FirstOrDefault(x => x.ParamName == selectedFilterCol);
+                if (existedSP is null)
                 {
                     var sp = ReoSoluParamValueHelper.CreateSP(selectedFilterCol); // 必须重新生成一个
-                    // sp为空时
-                    if (ch.SolutionParamList.Count == 0)
-                    {
-                        sp.RowStart = ch.RowStart;
-                        sp.ColStart = ch.ColStart + 1;
-
-                        sp.RowEnd = sp.RowStart;
-                        sp.ColEnd = sp.ColStart;
-
-                        ch.SolutionParamList.Add(sp);
-                    }
-                    else
-                    {
-                        var existeSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName == selectedFilterCol);
-                        if (existeSP is null)
-                        {
-                            var row = ch.RowEnd + 1;
-                            sp.RowStart = row;
-                            sp.RowEnd = row;
-
-                            sp.ColStart = ch.ColStart + 1;
-                            sp.ColEnd = sp.ColStart;
-
-                            ch.SolutionParamList.Add(sp);
-
-                            Sheet.InsertRows(row, 1);
-                            //ReoGrid.DoAction(new InsertRowsAction(row, 1));
+                    var count = allSPs.Count;
+                    sp.ColStart = count + 1;
+                    sp.ColEnd = sp.ColStart;
+                    sp.RowStart = sp.RowEnd = 0;
+                    allSPs.Add(sp);
 
 
-                            var lowSPs = allSPs.Where(x => x.RowStart >= row).ToList();
-                            foreach (var lrow in lowSPs)
-                            {
-                                lrow.RowStart++;
-                                lrow.RowEnd++;
-                                foreach (var val in lrow.ParamValues)
-                                {
-                                    val.RowStart++;
-                                    val.RowEnd++;
-                                }
-                            }
-                            allSPs.Add(sp);
+                    Sheet.InsertColumns(sp.ColStart, 1);
 
-                            ch.RowEnd++;
-                            var lowChs = Serial.SolutionChannels.Except([ch]).Where(x => x.RowStart >= row).ToList();
-                            foreach (var lch in lowChs)
-                            {
-                                lch.RowStart++;
-                                lch.RowEnd++;
-                            }
-                        }
-                    }
-                    try
-                    {
-                        //ReoGrid.DoAction(new SetCellDataAction(sp.RowStart, sp.ColStart, sp.ParamAlias));
-                        var propCell = Sheet.CreateAndGetCell(sp.RowStart, sp.ColStart);
-                        propCell.Data = sp.ParamAlias;
-                        propCell.IsReadOnly = true;
-                    }
-                    catch (Exception ex)
-                    {
-
-                    }
-
-
-                    // 更新channel range
-                    UpdateChRange(ch);
+                    var propCell = Sheet.CreateAndGetCell(sp.RowStart, sp.ColStart);
+                    propCell.Data = sp.ParamAlias;
+                    propCell.IsReadOnly = true;
                 }
-                // 3. 调整sheet的最大行数
-                //var rows = Serial.SolutionChannels.Max(x => x.RowEnd) + 1;
-                // Sheet.SetRows(rows);
-                SetMaxRows();
+
+                //SetMaxRows();
+                SetMaxCols();
             }
         }
 
@@ -1094,74 +991,60 @@ namespace TestReoGrid
         {
             if (selectedFilterCol is { Length: > 0 })
             {
-                var allSPs = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
-                foreach (var ch in Serial.SolutionChannels)
+                var allSPs = Parallel.ParallelSolutionParams;
+                var sp = allSPs.FirstOrDefault(x => x.ParamName == selectedFilterCol);
+                if (sp != null)
                 {
-                    var sp = ch.SolutionParamList.FirstOrDefault(x => x.ParamName == selectedFilterCol);
-                    if (sp != null)
+                    allSPs.Remove(sp);
+
+                    // 删除完sp后，讲prop置空即可
+                    if (allSPs.Count == 0)
                     {
-                        ch.SolutionParamList.Remove(sp);
-                        allSPs.Remove(sp);
-                        // 删除完sp后，讲prop置空即可
-                        if (ch.SolutionParamList.Count == 0)
+                        Sheet.SetCellData(sp.RowStart, sp.ColStart, null);
+                        //ReoGrid.DoAction(new SetCellDataAction(sp.RowStart, sp.ColStart, null));
+
+                        // 清空值
+                        foreach (var spv in sp.ParamValues)
                         {
-                            Sheet.SetCellData(sp.RowStart, sp.ColStart, null);
-                            //ReoGrid.DoAction(new SetCellDataAction(sp.RowStart, sp.ColStart, null));
-
-                            // 清空值
-                            foreach (var spv in sp.ParamValues)
+                            var cell = Sheet.GetCell(spv.RowStart, spv.ColStart);
+                            if (cell is not null)
                             {
-                                //spv.ParamValue = null;
-                                var cell = Sheet.GetCell(spv.RowStart, spv.ColStart);
-                                if (cell is not null)
-                                {
-                                    //ReoGrid.DoAction(new SetCellDataAction(spv.RowStart, spv.ColStart, null));
-                                    cell.Data = null;
-                                    //Validate(spv);
-                                    RestoreNullDanger(cell.Row, cell.Column); // 恢复
-                                }
-                            }
-                        }
-                        else
-                        {
-
-                            var row = sp.RowStart;
-                            // 更新sp
-                            var lowRows = allSPs.Where(x => x.RowStart >= row).ToList();
-                            foreach (var lrow in lowRows)
-                            {
-                                lrow.RowStart--;
-                                lrow.RowEnd--;
-                                foreach (var val in lrow.ParamValues)
-                                {
-                                    val.RowStart--;
-                                    val.RowEnd--;
-                                }
-                            }
-                            // 更新ch
-                            ch.RowEnd--;
-                            var lowChs = Serial.SolutionChannels.Except([ch]).Where(x => x.RowStart >= ch.RowEnd).ToList();
-                            foreach (var lch in lowChs)
-                            {
-                                lch.RowStart--;
-                                lch.RowEnd--;
-                            }
-
-                            try
-                            {
-                                Sheet.DeleteRows(sp.RowStart, 1);
-                                //ReoGrid.DoAction(new RemoveRowsAction(sp.RowStart, 1));
-                                // 更新channel range
-                                UpdateChRange(ch);
-                            }
-                            catch (Exception ex)
-                            {
-
+                                //ReoGrid.DoAction(new SetCellDataAction(spv.RowStart, spv.ColStart, null));
+                                cell.Data = null;
+                                //Validate(spv);
+                                RestoreNullDanger(cell.Row, cell.Column); // 恢复
                             }
                         }
                     }
+                    else
+                    {
+                        var col = sp.ColStart;
+                        // 更新sp
+                        var rightCols = allSPs.Where(x => x.ColStart >= col).ToList();
+                        foreach (var rCol in rightCols)
+                        {
+                            rCol.ColStart--;
+                            rCol.ColEnd--;
+                            foreach (var val in rCol.ParamValues)
+                            {
+                                val.ColStart--;
+                                val.ColEnd--;
+                            }
+                        }
+
+                        try
+                        {
+                            Sheet.DeleteColumns(sp.ColStart, 1);
+                            //ReoGrid.DoAction(new RemoveRowsAction(sp.RowStart, 1));
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
                 }
-                SetMaxRows();
+                //SetMaxRows();
+                SetMaxCols();
             }
         }
 
@@ -1191,23 +1074,26 @@ namespace TestReoGrid
         /// </summary>
         private void Check()
         {
-            var sps = Serial.SolutionChannels.SelectMany(x => x.SolutionParamList).ToList();
-            var spvs = sps.SelectMany(x => x.ParamValues).ToList();
-            //if (spvs.Count > 0)
+            var sps = Parallel.ParallelSolutionParams.ToList();
+            //var spvs = sps.SelectMany(x => x.ParamValues).ToList();
+
+            var minRow = Parallel.Channels.FirstOrDefault()?.RowStart;
+            var maxRow = Parallel.Channels.LastOrDefault()?.RowStart;
+
+            if (minRow.HasValue && maxRow.HasValue)
             {
-                var maxCol = spvs.Count > 0 ? spvs.Max(x => x.ColStart) : 2;
-                var minCol = 2;
                 foreach (var sp in sps)
                 {
                     if (!IsAuto(sp.ParamName))
                     {
-                        var row = sp.RowStart;
-                        for (int i = minCol; i <= maxCol; i++)
+                        var col = sp.ColStart;
+
+                        for (int i = minRow.Value; i <= maxRow.Value; i++)
                         {
-                            var spv = sp.FindSoluParamValue(row, i);
+                            var spv = sp.FindSoluParamValue(i, col);
                             if (spv is null)
                             {
-                                spv = CreateSPV(row, i, sp.ParamName, null);
+                                spv = CreateSPV(i, col, sp.ParamName, null);
                                 sp.ParamValues.Add(spv);
                                 //break;
                             }
@@ -1216,7 +1102,7 @@ namespace TestReoGrid
 
                             if (spv.HasError)
                             {
-                                Sheet.SelectRange(row, i, 1, 1); // 防止不能立即显色
+                                Sheet.SelectRange(col, i, 1, 1); // 防止不能立即显色
                             }
                         }
                     }
@@ -1281,9 +1167,29 @@ namespace TestReoGrid
         {
             // 3. 调整sheet的最大行数
             Sheet.UndefineNamedRange("Blank");
-            var rows = Serial.SolutionChannels.Max(x => x.RowEnd) + 1;
+            var rows = Parallel.Channels.Max(x => x.RowEnd) + 1;
             Sheet.SetRows(rows + 1);
             var blankRange = Sheet.DefineNamedRange("Blank", rows, 0, 1, Sheet.ColumnCount);
+            blankRange.Merge();
+            blankRange.IsReadonly = true;
+        }
+        /// <summary>
+        /// 设置最大列
+        /// </summary>
+        private void SetMaxCols()
+        {
+            Sheet.UndefineNamedRange("BlankCol");
+            var cols = 1; // 冻结列的序号
+
+            if (Parallel.ParallelSolutionParams.Count > 0)
+            {
+                cols = Parallel.ParallelSolutionParams.Max(x => x.ColEnd) + 1; // 最后一列向后
+            }
+            //Sheet.SetCols(cols + 1);
+
+            // 第一行，排除最后一行(研究被冻结)
+            // 冻结列开始，共总列数 - channel和prop的列数（=cols+1）
+            var blankRange = Sheet.DefineNamedRange("BlankCol", 0, cols, Sheet.RowCount - 1, Sheet.ColumnCount - cols);
             blankRange.Merge();
             blankRange.IsReadonly = true;
         }
@@ -1326,44 +1232,13 @@ namespace TestReoGrid
         }
 
 
-        //private void Data()
-        //{
-        //var channels = new List<string>();
-        //for (int i = 0; i < 8; i++)
-        //{
-        //    channels.Add($"Channel{i + 1}");
-        //}
-        //Sheet["A1:A8"] = channels;
-        //Sheet["B1:B8"] = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" };
-        //}
 
-
-
-        //private void CreateRanges()
-        //{
-        //    ChannelsRange = Sheet.DefineNamedRange(Channels, "A1:A8");
-        //    ChannelsRange.IsReadonly = true;
-        //    ChannelsRange.Comment = "123";
-
-        //    var channels = new List<string>();
-        //    for (int i = 0; i < 8; i++)
-        //    {
-        //        channels.Add($"Channel{i + 1}");
-        //    }
-        //    ChannelsRange.Data = channels;
-
-
-        //    PropRange = Sheet.DefineNamedRange(Props, "B1:B8");
-        //    PropRange.IsReadonly = true;
-
-        //    PropRange.Data = new object[] { "Conc.", "Conc.", "Conc.", "Conc.", "Mass Conc.", "Name", "Info", "MW" }; ;
-        //}
 
         public void InitParallel(ParallelRange parallel, Worksheet sheet)
         {
             // 1. 设置列宽（前两列需要加宽）
             sheet.SetColumnsWidth(0, 1, 120);
-            sheet.SetColumnsWidth(1, 1, 100);
+            //sheet.SetColumnsWidth(1, 1, 100);
 
             var sps = parallel.ParallelSolutionParams;
             if (sps.Count > 0)
@@ -1375,11 +1250,14 @@ namespace TestReoGrid
                 sheet.EnableSettings(WorksheetSettings.Edit_Readonly);
             }
 
+            // 2-1. 第一个格子默认冻结
+            var firstCell = sheet.CreateAndGetCell(0, 0);
+            firstCell.IsReadOnly = true;
+
             // 2. 填充部分数据
             for (int i = 0; i < parallel.Channels.Count; i++)
             {
                 // 1-1 channel的范围1格
-           
                 var chD = parallel.Channels[i];
 
                 Sheet.UndefineNamedRange(chD.NameKey);
@@ -1412,8 +1290,8 @@ namespace TestReoGrid
             }
 
             // 3. 调整sheet的最大行数
-           
             SetMaxRows();
+            SetMaxCols();
         }
         #endregion Init Reogrid
     }
