@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Color x:Key="PL_GreyColor">#F6F6F6</Color>
             <Color x:Key="PL_WarningColor">#FF7000</Color>
             <Color x:Key="PL_MainTextColor">#707070</Color>
 
@@ -19,7 +20,11 @@
             
             <SolidColorBrush x:Key="PL_DangerBrush"
                              Color="{StaticResource PL_DangerColor}" />
-            
+
+            <SolidColorBrush x:Key="PL_GreyBrush"
+                             Color="{StaticResource PL_GreyColor}" />
+
+
             <hc:NoBlankTextRule x:Key="Name"
                                 ErrorContent="Can't be null."
                                 ValidatesOnTargetUpdated="True" />

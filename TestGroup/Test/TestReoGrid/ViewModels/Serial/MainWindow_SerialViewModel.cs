@@ -38,6 +38,7 @@ namespace TestReoGrid
         private Color _mainTextColor;
         private Color _dangerColor;
         private Color _lightDangerColor;
+        private Color _greyColor;
 
         private ToolTip _toolTip = new()
         {
@@ -117,6 +118,7 @@ namespace TestReoGrid
             _dangerColor = (Color)Application.Current.Resources["PL_DangerColor"];
             _mainTextColor = (Color)Application.Current.Resources["PL_MainTextColor"];
             _lightDangerColor = (Color)Application.Current.Resources["PL_LightDangerColor"];
+            _greyColor = (Color)Application.Current.Resources["PL_GreyColor"];
 
             ReoGrid = reoGrid;
             Sheet = reoGrid.CurrentWorksheet;
@@ -1309,6 +1311,16 @@ namespace TestReoGrid
             sheet.Name = "Serial";
 
             //DataFormatterManager.Instance.DataFormatters.Add(CellDataFormatFlag.Custom, new DoubleDataFormt());
+
+            var rgcs = ControlAppearanceStyle.CreateDefaultControlStyle();
+            rgcs[ControlAppearanceColors.LeadHeadNormal] = _greyColor.ToReoColor();
+            rgcs[ControlAppearanceColors.ColHeadNormalStart] = _greyColor.ToReoColor();
+            rgcs[ControlAppearanceColors.ColHeadNormalEnd] = _greyColor.ToReoColor();
+            rgcs[ControlAppearanceColors.ColHeadText] = _mainTextColor.ToReoColor();
+            rgcs[ControlAppearanceColors.RowHeadNormal] = _greyColor.ToReoColor();
+            rgcs[ControlAppearanceColors.RowHeadText] = _mainTextColor.ToReoColor();
+
+            reoGrid.ControlStyle = rgcs;
         }
 
 
