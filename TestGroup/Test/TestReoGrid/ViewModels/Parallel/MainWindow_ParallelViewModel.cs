@@ -206,7 +206,6 @@ namespace TestReoGrid
             {
                 MessageBox.Show("Success！");
             }
-            //DataGenerateHelper.GetSerialData(Serial, Sheet);
         }
 
 
@@ -1147,17 +1146,17 @@ namespace TestReoGrid
             return spv;
         }
 
-        private void UpdateChRange(SerialSolutionChannel ch)
-        {
-            // 更新channel range
-            Sheet.UndefineNamedRange(ch.NameKey);
-            var newRange = Sheet.DefineNamedRange(ch.NameKey, ch.RowStart, ch.ColStart, ch.Rows, ch.Cols);
-            newRange.Merge();
-            newRange.Style.HorizontalAlign = ReoGridHorAlign.Center;
-            newRange.Style.VerticalAlign = ReoGridVerAlign.Middle;
-            newRange.Data = new[] { $"channel{ch.ChannelInfo.Channel_No + 1}" };
-            newRange.IsReadonly = true;
-        }
+        //private void UpdateChRange(SerialSolutionChannel ch)
+        //{
+        //    // 更新channel range
+        //    Sheet.UndefineNamedRange(ch.NameKey);
+        //    var newRange = Sheet.DefineNamedRange(ch.NameKey, ch.RowStart, ch.ColStart, ch.Rows, ch.Cols);
+        //    newRange.Merge();
+        //    newRange.Style.HorizontalAlign = ReoGridHorAlign.Center;
+        //    newRange.Style.VerticalAlign = ReoGridVerAlign.Middle;
+        //    newRange.Data = new[] { $"channel{ch.ChannelInfo.Channel_No + 1}" };
+        //    newRange.IsReadonly = true;
+        //}
 
 
         /// <summary>
@@ -1167,9 +1166,10 @@ namespace TestReoGrid
         {
             // 3. 调整sheet的最大行数
             Sheet.UndefineNamedRange("Blank");
-            var rows = Parallel.Channels.Max(x => x.RowEnd) + 1;
-            Sheet.SetRows(rows + 1);
-            var blankRange = Sheet.DefineNamedRange("Blank", rows, 0, 1, Sheet.ColumnCount);
+            var rows = Parallel.Channels.Max(x => x.RowEnd) + 1; // 行数
+            //Sheet.SetRows(rows + 1);
+            // 行单元格合并
+            var blankRange = Sheet.DefineNamedRange("Blank", rows, 0, Sheet.RowCount - rows, Sheet.ColumnCount);
             blankRange.Merge();
             blankRange.IsReadonly = true;
         }
@@ -1180,7 +1180,7 @@ namespace TestReoGrid
         {
             Sheet.UndefineNamedRange("BlankCol");
             var cols = 1; // 冻结列的序号
-
+            var rows = Parallel.Channels.Max(x => x.RowEnd) + 1; // 行数
             if (Parallel.ParallelSolutionParams.Count > 0)
             {
                 cols = Parallel.ParallelSolutionParams.Max(x => x.ColEnd) + 1; // 最后一列向后
@@ -1189,7 +1189,7 @@ namespace TestReoGrid
 
             // 第一行，排除最后一行(研究被冻结)
             // 冻结列开始，共总列数 - channel和prop的列数（=cols+1）
-            var blankRange = Sheet.DefineNamedRange("BlankCol", 0, cols, Sheet.RowCount - 1, Sheet.ColumnCount - cols);
+            var blankRange = Sheet.DefineNamedRange("BlankCol", 0, cols, rows/*Sheet.RowCount - 1*/, Sheet.ColumnCount - cols);
             blankRange.Merge();
             blankRange.IsReadonly = true;
         }
