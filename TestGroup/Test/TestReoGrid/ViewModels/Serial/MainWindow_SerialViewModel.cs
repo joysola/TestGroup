@@ -198,7 +198,7 @@ namespace TestReoGrid
         /// 测试
         /// </summary>
         [RelayCommand]
-        private void GetSerialData()
+        private void GetData()
         {
             // 结束编辑
             Sheet.EndEdit(EndEditReason.NormalFinish);
@@ -1291,8 +1291,9 @@ namespace TestReoGrid
             // 3. 调整sheet的最大行数
             Sheet.UndefineNamedRange("Blank");
             var rows = Serial.SolutionChannels.Max(x => x.RowEnd) + 1;
-            Sheet.SetRows(rows + 1);
-            var blankRange = Sheet.DefineNamedRange("Blank", rows, 0, 1, Sheet.ColumnCount);
+            //Sheet.SetRows(rows + 1);
+            //var blankRange = Sheet.DefineNamedRange("Blank", rows, 0, 1, Sheet.ColumnCount);
+            var blankRange = Sheet.DefineNamedRange("Blank", rows, 0, Sheet.RowCount - rows, Sheet.ColumnCount);
             blankRange.Merge();
             blankRange.IsReadonly = true;
         }
