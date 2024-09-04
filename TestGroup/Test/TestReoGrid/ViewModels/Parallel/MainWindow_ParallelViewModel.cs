@@ -502,7 +502,6 @@ namespace TestReoGrid
                 return true;
             });
 
-
             // 没啥用
             _operStatus = OperEnum.None;
         }
