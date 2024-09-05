@@ -81,28 +81,28 @@ namespace TestReoGrid.Helpers
                 var preRows = 0;
                 if (r > 0)
                 {
-                    preRows = rawDatas[r - 1].RowEnd + 1;
+                    preRows = rawDatas[r - 1].ChannelInfo.RowEnd + 1;
                 }
                 var ch = rawDatas[r];
-                ch.RowStart = preRows/* + 1*/; // 从0开始算
+                ch.ChannelInfo.RowStart = preRows/* + 1*/; // 从0开始算
                 var spCount = ch.SolutionParamList.Count;
                 if (spCount == 0)
                 {
                     spCount = 1;
                 }
-                ch.RowEnd = ch.RowStart + spCount - 1;
-                ch.ColStart = 0/*1*/;
-                ch.ColEnd = 0;
+                ch.ChannelInfo.RowEnd = ch.ChannelInfo.RowStart + spCount - 1;
+                ch.ChannelInfo.ColStart = 0/*1*/;
+                ch.ChannelInfo.ColEnd = 0;
 
                 ch.NameKey = $"{ch.ChannelInfo.Channel_No}";
 
                 for (int i = 0; i < ch.SolutionParamList.Count; i++)
                 {
                     var prop = ch.SolutionParamList[i];
-                    prop.RowStart = ch.RowStart + i;
+                    prop.RowStart = ch.ChannelInfo.RowStart + i;
                     prop.RowEnd = prop.RowStart;
 
-                    prop.ColStart = ch.ColStart + 1;
+                    prop.ColStart = ch.ChannelInfo.ColStart + 1;
                     prop.ColEnd = prop.ColStart;//ch.ColEnd;
 
                     prop.NameKey = $"{ch.NameKey}@{prop.ParamName}";

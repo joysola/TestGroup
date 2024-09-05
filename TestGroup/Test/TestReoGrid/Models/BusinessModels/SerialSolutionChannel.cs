@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TestReoGrid.Models
 {
-    public partial class SerialSolutionChannel : ObservableObject, IReoModel
+    public partial class SerialSolutionChannel : ObservableObject
     {
         /// <summary>
         /// 记录所在通道
@@ -26,13 +26,13 @@ namespace TestReoGrid.Models
 
         public string NameKey { get; set; }
 
-        public int RowStart { get; set; }
-        public int RowEnd { get; set; }
+        //public int RowStart { get; set; }
+        //public int RowEnd { get; set; }
 
-        public int ColStart { get; set; }
-        public int ColEnd { get; set; }
+        //public int ColStart { get; set; }
+        //public int ColEnd { get; set; }
 
-        public int Rows => RowEnd - RowStart + 1;
-        public int Cols => ColEnd - ColStart + 1;
+        //public int Rows => RowEnd - RowStart + 1;
+        //public int Cols => ColEnd - ColStart + 1;
     }
 }

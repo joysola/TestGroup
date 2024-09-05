@@ -419,7 +419,7 @@ namespace TestReoGrid
                 // to
                 Sheet.IterateCells(e.ToRange, (row, col, cell) =>
                 {
-                    var soluCh = Serial.SolutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
+                    var soluCh = Serial.SolutionChannels.FirstOrDefault(x => row >= x.ChannelInfo.RowStart && row <= x.ChannelInfo.RowEnd);
                     if (soluCh is not null)
                     {
                         var sp = Serial.SolutionChannels.FindSerialSoluParam(row, col);
@@ -553,7 +553,8 @@ namespace TestReoGrid
                         RestoreCell(cell.Row, cell.Column);
 
                         RestoreDataFormat(cell.Row, cell.Column);
-
+                        // 同步清理对应的autospv
+                        AutoCalcuate(row, col, spv.ParamName);
                         return true;
                     });
                     break;
@@ -570,6 +571,7 @@ namespace TestReoGrid
                             RestoreCell(cell.Row, cell.Column);
 
                             RestoreDataFormat(cell.Row, cell.Column);
+
                             AutoCalcuate(row, col, spv.ParamName);
                         }
 
@@ -1030,8 +1032,8 @@ namespace TestReoGrid
                     // sp为空时
                     if (ch.SolutionParamList.Count == 0)
                     {
-                        sp.RowStart = ch.RowStart;
-                        sp.ColStart = ch.ColStart + 1;
+                        sp.RowStart = ch.ChannelInfo.RowStart;
+                        sp.ColStart = ch.ChannelInfo.ColStart + 1;
 
                         sp.RowEnd = sp.RowStart;
                         sp.ColEnd = sp.ColStart;
@@ -1043,11 +1045,11 @@ namespace TestReoGrid
                         var existeSP = ch.SolutionParamList.FirstOrDefault(x => x.ParamName == selectedFilterCol);
                         if (existeSP is null)
                         {
-                            var row = ch.RowEnd + 1;
+                            var row = ch.ChannelInfo.RowEnd + 1;
                             sp.RowStart = row;
                             sp.RowEnd = row;
 
-                            sp.ColStart = ch.ColStart + 1;
+                            sp.ColStart = ch.ChannelInfo.ColStart + 1;
                             sp.ColEnd = sp.ColStart;
 
                             ch.SolutionParamList.Add(sp);
@@ -1069,12 +1071,12 @@ namespace TestReoGrid
                             }
                             allSPs.Add(sp);
 
-                            ch.RowEnd++;
-                            var lowChs = Serial.SolutionChannels.Except([ch]).Where(x => x.RowStart >= row).ToList();
+                            ch.ChannelInfo.RowEnd++;
+                            var lowChs = Serial.SolutionChannels.Except([ch]).Where(x => x.ChannelInfo.RowStart >= row).ToList();
                             foreach (var lch in lowChs)
                             {
-                                lch.RowStart++;
-                                lch.RowEnd++;
+                                lch.ChannelInfo.RowStart++;
+                                lch.ChannelInfo.RowEnd++;
                             }
                         }
                     }
@@ -1150,12 +1152,12 @@ namespace TestReoGrid
                                 }
                             }
                             // 更新ch
-                            ch.RowEnd--;
-                            var lowChs = Serial.SolutionChannels.Except([ch]).Where(x => x.RowStart >= ch.RowEnd).ToList();
+                            ch.ChannelInfo.RowEnd--;
+                            var lowChs = Serial.SolutionChannels.Except([ch]).Where(x => x.ChannelInfo.RowStart >= ch.ChannelInfo.RowEnd).ToList();
                             foreach (var lch in lowChs)
                             {
-                                lch.RowStart--;
-                                lch.RowEnd--;
+                                lch.ChannelInfo.RowStart--;
+                                lch.ChannelInfo.RowEnd--;
                             }
 
                             try
@@ -1276,7 +1278,7 @@ namespace TestReoGrid
         {
             // 更新channel range
             Sheet.UndefineNamedRange(ch.NameKey);
-            var newRange = Sheet.DefineNamedRange(ch.NameKey, ch.RowStart, ch.ColStart, ch.Rows, ch.Cols);
+            var newRange = Sheet.DefineNamedRange(ch.NameKey, ch.ChannelInfo.RowStart, ch.ChannelInfo.ColStart, ch.ChannelInfo.Rows, ch.ChannelInfo.Cols);
             newRange.Merge();
             newRange.Style.HorizontalAlign = ReoGridHorAlign.Center;
             newRange.Style.VerticalAlign = ReoGridVerAlign.Middle;
@@ -1292,7 +1294,7 @@ namespace TestReoGrid
         {
             // 3. 调整sheet的最大行数
             Sheet.UndefineNamedRange("Blank");
-            var rows = Serial.SolutionChannels.Max(x => x.RowEnd) + 1;
+            var rows = Serial.SolutionChannels.Max(x => x.ChannelInfo.RowEnd) + 1;
             //Sheet.SetRows(rows + 1);
             //var blankRange = Sheet.DefineNamedRange("Blank", rows, 0, 1, Sheet.ColumnCount);
             var blankRange = Sheet.DefineNamedRange("Blank", rows, 0, Sheet.RowCount - rows, Sheet.ColumnCount);
@@ -1405,7 +1407,7 @@ namespace TestReoGrid
                 var chD = serial.SolutionChannels[i];
 
                 Sheet.UndefineNamedRange(chD.NameKey);
-                var newRange = Sheet.DefineNamedRange(chD.NameKey, chD.RowStart, chD.ColStart, chD.Rows, chD.Cols);
+                var newRange = Sheet.DefineNamedRange(chD.NameKey, chD.ChannelInfo.RowStart, chD.ChannelInfo.ColStart, chD.ChannelInfo.Rows, chD.ChannelInfo.Cols);
                 newRange.Merge();
                 newRange.Style.HorizontalAlign = ReoGridHorAlign.Center;
                 newRange.Style.VerticalAlign = ReoGridVerAlign.Middle;

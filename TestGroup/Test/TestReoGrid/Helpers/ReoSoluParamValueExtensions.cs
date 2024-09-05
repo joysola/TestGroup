@@ -15,7 +15,7 @@ namespace TestReoGrid.Helpers
             SolutionParam sp = null;
             if (solutionChannels?.Count > 0 && row > -1 && col > -1)
             {
-                var soluCh = solutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
+                var soluCh = solutionChannels.FirstOrDefault(x => row >= x.ChannelInfo.RowStart && row <= x.ChannelInfo.RowEnd);
                 if (soluCh is not null)
                 {
                     sp = soluCh.SolutionParamList.FirstOrDefault(x => x.RowStart == row);
@@ -87,7 +87,7 @@ namespace TestReoGrid.Helpers
         public static SerialSolutionChannel FindSolutionChannel(this IList<SerialSolutionChannel> solutionChannels, int row, int col)
         {
             SerialSolutionChannel soluCh = null;
-            soluCh = solutionChannels.FirstOrDefault(x => row >= x.RowStart && row <= x.RowEnd);
+            soluCh = solutionChannels.FirstOrDefault(x => row >= x.ChannelInfo.RowStart && row <= x.ChannelInfo.RowEnd);
             return soluCh;
         }
 
