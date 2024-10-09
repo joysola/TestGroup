@@ -285,9 +285,9 @@ namespace TestReoGrid
         private void DeleteProp(string selectedFilterCol)
         {
             _operStatus = OperEnum.DeleteRow;
-            //UndefineAutoRange(); // 解除定义，防止删除丢失范围
+            UndefineAutoRange(); // 解除定义，防止删除丢失范围
             DeletePropCore(selectedFilterCol);
-            //DefineAutoRange(); // 恢复定义
+            DefineAutoRange(); // 恢复定义
             _operStatus = OperEnum.None;
         }
 
@@ -875,7 +875,7 @@ namespace TestReoGrid
         private void DeleteAutoSP()
         {
             // 1. 
-            //UndefineAutoRange();
+            UndefineAutoRange();
             // 2.
             DeletePropCore(nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
         }
@@ -950,7 +950,7 @@ namespace TestReoGrid
             }
 
             // 2. 
-            //DefineAutoRange();
+            DefineAutoRange();
         }
 
 
@@ -1230,7 +1230,47 @@ namespace TestReoGrid
             //Sheet.Unfreeze();
         }
 
+        /// <summary>
+        /// 解除定义autoRange
+        /// </summary>
+        private void UndefineAutoRange()
+        {
 
+            var autoSP = Parallel.ParallelSolutionParams.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+
+            if (autoSP is not null)
+            {
+                var rangeName = $"{autoSP.ParamName}";
+                var range = Sheet.GetNamedRange(rangeName);
+                if (range is not null)
+                {
+                    range.Style.TextColor = SolidColor.Black;
+                    range.IsReadonly = false;
+                }
+                var xx = Sheet.UndefineNamedRange(rangeName);
+            }
+
+        }
+
+        /// <summary>
+        /// 定义autorange
+        /// </summary>
+        private void DefineAutoRange()
+        {
+
+            var autoSP = Parallel.ParallelSolutionParams.FirstOrDefault(x => x.ParamName is nameof(PL_Exp_Dsgn_Inject.Mass_concentration));
+
+            if (autoSP is not null)
+            {
+                var newRange = Sheet.DefineNamedRange($"{autoSP.ParamName}", autoSP.RowStart + 1, autoSP.ColStart, Sheet.RowCount - 1, 1);
+                if (newRange is not null)
+                {
+                    newRange.Style.TextColor = _mainTextColor.ToReoColor();
+                    newRange.IsReadonly = true;
+                }
+            }
+
+        }
 
 
         public void InitParallel(ParallelRange parallel, Worksheet sheet)
