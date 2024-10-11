@@ -114,19 +114,42 @@ namespace TestMedianFilter
 
 
             ];
+
+        static List<double> _ruSecList =
+            [
+                0,
+                128.7            ,
+                100.6            ,
+                72.64            ,
+                123.2            ,
+                104.5            ,
+                22.99            ,
+                0                ,
+                127.7            ,
+                98.82            ,
+                4.494            ,
+                6.194            ,
+                96.71            ,
+                33.37            ,
+                0                ,
+                128.9            ,
+                100.5            ,
+
+            ];
+
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
             var window = 5;
             //var addPointsCount = window / 2;
             var addPointsCount = window;
-            var testList = _ruNotZeroList;
+            var testList = _ruSecList;
 
 
             var filter = new OnlineMedianFilter(window);
             var length = testList.Count;
 
-            List<double> newRUs8 = [.. testList.Where(x => x <= 106.2 && x >= 17)];
+            List<double> newRUs8 = [.. testList.Where(x => x <= 125.5 && x >= 2.134)];
             for (int i = 0; i < addPointsCount; i++)
             {
                 newRUs8.Insert(0, testList[0]);
@@ -139,10 +162,10 @@ namespace TestMedianFilter
             //}
             var result0 = filter.ProcessSamples(newRUs8.ToArray());
 
-            var result1 = ApplyMedianFilter([..newRUs8], window);
+            var result1 = ApplyMedianFilter([.. newRUs8], window);
 
             var xx = 0;
-           
+
 
 
             Console.ReadKey();
@@ -196,7 +219,7 @@ namespace TestMedianFilter
             return output;
         }
 
-      
+
 
 
 
