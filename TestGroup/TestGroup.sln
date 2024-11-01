@@ -73,7 +73,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReoGrid.Mvvm", "Test\ReoGri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestMedianFilter", "Test\TestNormalize\TestMedianFilter\TestMedianFilter.csproj", "{9878E1BD-0AAF-4AED-AD40-F8A49A35B308}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestCutoff", "Test\TestCutoff\TestCutoff.csproj", "{C1BA7A6A-F024-4712-8DFD-FFFDBB7CD9C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCutoff", "Test\TestCutoff\TestCutoff.csproj", "{C1BA7A6A-F024-4712-8DFD-FFFDBB7CD9C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestNullableProperty", "Test\TestNullableProperty\TestNullableProperty.csproj", "{BF6B0022-640A-40A4-B200-D7A125C17738}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -177,6 +179,10 @@ Global
 		{C1BA7A6A-F024-4712-8DFD-FFFDBB7CD9C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1BA7A6A-F024-4712-8DFD-FFFDBB7CD9C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1BA7A6A-F024-4712-8DFD-FFFDBB7CD9C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF6B0022-640A-40A4-B200-D7A125C17738}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF6B0022-640A-40A4-B200-D7A125C17738}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF6B0022-640A-40A4-B200-D7A125C17738}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF6B0022-640A-40A4-B200-D7A125C17738}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -216,6 +222,7 @@ Global
 		{91C22DCE-7D14-4E7D-85FC-612FAA07D2AC} = {0D9B0C10-F680-491D-B768-1B3E78A9DB2C}
 		{9878E1BD-0AAF-4AED-AD40-F8A49A35B308} = {0D9B0C10-F680-491D-B768-1B3E78A9DB2C}
 		{C1BA7A6A-F024-4712-8DFD-FFFDBB7CD9C3} = {0D9B0C10-F680-491D-B768-1B3E78A9DB2C}
+		{BF6B0022-640A-40A4-B200-D7A125C17738} = {0D9B0C10-F680-491D-B768-1B3E78A9DB2C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5F15127E-7428-4DC2-8B59-98F422C0234E}
